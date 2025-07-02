@@ -1,0 +1,21 @@
+{
+  "tranlsationEN": {
+    "welcome": "Welcome to our application!",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "email": "Email",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "error": {
+      "requiredField": "This field is required.",
+      "invalidEmail": "Please enter a valid email address."
+    },
+    "success": {
+      "registrationComplete": "Registration completed successfully!",
+      "loginSuccessful": "Login successful!"
+    }
+  }
+}

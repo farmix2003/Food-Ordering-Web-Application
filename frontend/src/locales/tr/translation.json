@@ -1,0 +1,10 @@
+{
+  "translationTR": {
+    "welcome": "Hoş geldiniz",
+    "description": "Bu, i18next ile Türkçe çeviri örneğidir.",
+    "changeLanguage": "Dili değiştir",
+    "currentLanguage": "Geçerli dil: {{language}}",
+    "greeting": "Merhaba, {{name}}!",
+    "farewell": "Hoşça kal, {{name}}!"
+  }
+}

@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import MenuItemCard from "./MenuItem";
 import MenuItemModal from "./MenuItemModal";
-import { Edit, Plus, Save, X } from "lucide-react";
+import { Edit, Plus, Save } from "lucide-react";
 import { getRestaurantByUserId, createRestaurant } from "../../server/server";
 
 interface Image{
@@ -53,7 +52,6 @@ const RestaurantManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [newTag, setNewTag] = useState("");
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     description: "",
@@ -136,7 +134,7 @@ console.log(data);
       {
         email: newRestaurant.contactInfo.email,
         phone: newRestaurant.contactInfo.phoneNumber,
-        whatsAppNumber: newRestaurant.contactInfo.whatsAppNumber,
+        whatsApp: newRestaurant.contactInfo.whatsAppNumber,
         instagram: newRestaurant.contactInfo.instagram,
       }
     );
@@ -292,7 +290,10 @@ console.log(data);
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
-                            streetName: e.target.value,
+                            address:{
+                               ...prev.address,
+                              streetName: e.target.value,
+                            }
                           }))
                         }
                       />
@@ -305,7 +306,10 @@ console.log(data);
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
+                            address:{
+                              ...prev.address,
                             cityName: e.target.value,
+                            }
                           }))
                         }
                       />
@@ -321,7 +325,10 @@ console.log(data);
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
-                            email: e.target.value,
+                            contactInfo:{
+                              ...prev.contactInfo,
+                              email: e.target.value,
+                            }
                           }))
                         }
                       />
@@ -334,7 +341,10 @@ console.log(data);
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
-                            phoneNumber: e.target.value,
+                            contactInfo:{
+                              ...prev.contactInfo,
+                              phoneNumber: e.target.value,
+                            },
                           }))
                         }
                       />
@@ -349,20 +359,26 @@ console.log(data);
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
+                            contactInfo:{
+                              ...prev.contactInfo,
                             whatsAppNumber: e.target.value,
+                            }
                           }))
                         }
                       />
                     </div>
                     <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="instagram">Instagram Handle</Label>
+                      <Label htmlFor="instagram">Instagram Account</Label>
                       <Input
                         id="instagram"
                         value={newRestaurant.contactInfo.instagram}
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
+                            contactInfo:{
+                              ...prev.contactInfo,
                             instagram: e.target.value,
+                            }
                           }))
                         }
                       />

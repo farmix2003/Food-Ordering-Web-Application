@@ -185,25 +185,26 @@ const createRestaurant = async (
   contactInfo: {
     email: string;
     phone: string;
-    whatsAppNumber: string;
+    whatsApp: string;
     instagram: string;
   },
 ) => {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("description", description);
-  formData.append("streetName", address.streetName);
-  formData.append("cityName", address.cityName);
+  formData.append("address.streetName", address.streetName);
+  formData.append("address.cityName", address.cityName);
   formData.append("openingHours", openingHours);
   formData.append("closingHours", closingHours);
   formData.append("cuisineType", cuisineType);
   formData.append("images", images);
-  formData.append("email", contactInfo.email);
-  formData.append("phone", contactInfo.phone);
-  formData.append("whatsAppNumber", contactInfo.whatsAppNumber);
-  formData.append("instagram", contactInfo.instagram);
+ formData.append("contactInfo.email", contactInfo.email);
+formData.append("contactInfo.phone", contactInfo.phone);
+formData.append("contactInfo.whatsApp", contactInfo.whatsApp);
+formData.append("contactInfo.instagram", contactInfo.instagram);
 
-  const response = await axios.post("/admin/restaurant/add-restaurant", formData, {
+  const response = await axios.post("/admin/restaurant/add-restaurant", formData,
+   {
     headers: {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${window.localStorage.getItem("token")}`,

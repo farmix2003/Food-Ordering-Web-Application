@@ -263,11 +263,9 @@ public class RestaurantServiceImpl implements RestaurantService {
             dto.setOwnerUsername(restaurant.getOwner().getUsername());
         }
 
-        // Use entity lists directly
         dto.setFoods(restaurant.getFoods());
         dto.setOrders(restaurant.getOrders());
 
-        // Convert image list to URLs
         List<ImageResponse> imageResponses = restaurant.getImages().stream().map(image -> {
             ImageResponse res = new ImageResponse();
             res.setId(image.getId());

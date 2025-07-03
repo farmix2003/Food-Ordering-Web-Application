@@ -214,6 +214,87 @@ formData.append("contactInfo.instagram", contactInfo.instagram);
   return response.data;
 }
 
+const updateRestaurant = async (
+  id: number,
+  name: string,
+  description: string,
+  address: {
+    streetName: string;
+    cityName: string;
+  },
+  openingHours:string,
+  closingHours: string,
+  cuisineType: string,
+  contactInfo: {
+    email: string;
+    phone: string;
+    whatsApp: string;
+    instagram: string;
+  },
+ ) => {
+
+   const formData = new FormData();
+  formData.append("name", name);
+  formData.append("description", description);
+  formData.append("address.streetName", address.streetName);
+  formData.append("address.cityName", address.cityName);
+  formData.append("openingHours", openingHours);
+  formData.append("closingHours", closingHours);
+  formData.append("cuisineType", cuisineType);
+ formData.append("contactInfo.email", contactInfo.email);
+formData.append("contactInfo.phone", contactInfo.phone);
+formData.append("contactInfo.whatsApp", contactInfo.whatsApp);
+formData.append("contactInfo.instagram", contactInfo.instagram);
+
+
+  const response = await axios.put(
+    "/admin/restaurant/update/"+id,
+    formData,
+    {
+      headers: {
+        "Content-Type": "form-data",
+        Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+const deleteRestaurant = async (id: number) => {
+  const response = await axios.delete("/admin/restaurant/delete/" + id, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
+const addImageToRestaurant = async (id:number, image: File | Blob) => {
+  const formData = new FormData();
+  formData.append("image", image);
+
+  const response = await axios.post(
+    `/admin/restaurant/${id}/add`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+const deleteImageFromRestaurant = async (id: number, imagesId: number) => {
+   const response = await axios.delete(`/admin/restaurant/${id}/delete?ids=${imagesId}`, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
 export {
   loginUser,
   registerUser,
@@ -228,5 +309,9 @@ export {
   changeUserStatus,
   getAllRestaurants,
   getRestaurantByUserId,
-  createRestaurant
+  createRestaurant,
+  updateRestaurant,
+  deleteRestaurant,
+  addImageToRestaurant,
+  deleteImageFromRestaurant,
 };

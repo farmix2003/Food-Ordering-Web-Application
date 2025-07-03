@@ -9,16 +9,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import MenuItemCard from "./MenuItem";
 import MenuItemModal from "./MenuItemModal";
 import { Edit, Plus, Save } from "lucide-react";
-import { getRestaurantByUserId, createRestaurant } from "../../server/server";
-
+import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant } from "../../server/server";
+import { Trash2 } from "lucide-react"; 
 interface Image{
-  id: string;
+  id: number;
   url: string;
   fileName: string;
 }
 
 
 interface Restaurant {
+  id: number;
   name: string;
   images: Image[];
   cuisineType: string;
@@ -47,7 +48,7 @@ interface MenuItem {
 }
 
 const RestaurantManagement = () => {
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [restaurant, setRestaurant] = useState<Restaurant & {newImages?:File[]} | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
@@ -55,7 +56,7 @@ const RestaurantManagement = () => {
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     description: "",
-    cuisine: "",
+    cuisineType: "",
     address:{
       streetName: "",
     cityName: "",
@@ -63,7 +64,7 @@ const RestaurantManagement = () => {
     contactInfo:{
       email: "",
     phoneNumber: "",
-    whatsAppNumber: "",
+    whatsApp: "",
     instagram: "",
     },
     openingHours: "",
@@ -71,8 +72,7 @@ const RestaurantManagement = () => {
     image: null as File | null,
   });
 
-  useEffect(() => {
-    const fetchRestaurant = async() => {
+   const fetchRestaurant = async() => {
       try {
         const data = await getRestaurantByUserId();
         if (Object.keys(data).length === 0) {
@@ -95,18 +95,58 @@ console.log(data);
         });
       }
     };
+
+  useEffect(() => {
     fetchRestaurant();
   }, []);
 
-  const handleSaveRestaurant = () => {
-    if (restaurant) {
-      toast({
-        title: "Restaurant Updated",
-        description: "Your restaurant information has been saved successfully.",
-      });
-      console.log("Restaurant saved:", restaurant);
+
+  const handleDeleteImage = async (imageId: number) => {
+  try {
+    await deleteImageFromRestaurant(restaurant?.id || 0, imageId);
+    setRestaurant((prev) =>
+      prev
+        ? { ...prev, images: prev.images.filter((img) => img.id !== imageId) }
+        : prev
+    );
+    toast({ title: "Image Deleted", description: "Image removed successfully." });
+  } catch (error) {
+    toast({ title: "Error", description: "Failed to delete image.", variant: "destructive" });
+  }
+};
+
+const handleSaveRestaurant = async () => {
+  if (!restaurant) return;
+
+  try {
+    await updateRestaurant(
+      restaurant.id,
+      restaurant.name,
+      restaurant.description,
+      restaurant.address,
+      restaurant.openingHours,
+      restaurant.closingHours,
+      restaurant.cuisineType,
+      restaurant.contactInfo
+    );
+
+    if (restaurant.newImages?.length) {
+      for (const image of restaurant.newImages) {
+        await addImageToRestaurant(restaurant.id, image);
+      }
     }
-  };
+
+    toast({ title: "Restaurant Updated", description: "All changes have been saved." });
+    
+    // Optional: Refresh or reset `newImages`
+    setRestaurant((prev) =>
+      prev ? { ...prev, newImages: [] } : prev
+    );
+    fetchRestaurant();
+  } catch (error) {
+    toast({ title: "Error", description: "Failed to update restaurant", variant: "destructive" });
+  }
+};
 
   const handleCreateRestaurant = async () => {
     console.log("Creating restaurant with data:", newRestaurant);
@@ -129,12 +169,12 @@ console.log(data);
       },
       newRestaurant.openingHours,
       newRestaurant.closingHours,
-      newRestaurant.cuisine,
+      newRestaurant.cuisineType,
       newRestaurant.image,
       {
         email: newRestaurant.contactInfo.email,
         phone: newRestaurant.contactInfo.phoneNumber,
-        whatsApp: newRestaurant.contactInfo.whatsAppNumber,
+        whatsApp: newRestaurant.contactInfo.whatsApp,
         instagram: newRestaurant.contactInfo.instagram,
       }
     );
@@ -143,7 +183,7 @@ console.log(data);
     setNewRestaurant({
       name: "",
       description: "",
-      cuisine: "",
+      cuisineType: "",
      address:{
        streetName: "",
       cityName: "",
@@ -151,7 +191,7 @@ console.log(data);
       contactInfo:{
         email: "",
         phoneNumber: "",
-        whatsAppNumber: "",
+        whatsApp: "",
         instagram: "",
       },
       openingHours: "",
@@ -172,9 +212,7 @@ console.log(data);
   }
 };
 
- 
-
-  const handleAddMenuItem = () => {
+const handleAddMenuItem = () => {
     setEditingItem(null);
     setIsModalOpen(true);
   };
@@ -271,7 +309,7 @@ console.log(data);
                       <Label htmlFor="cuisine">Cuisine Type</Label>
                       <Input
                         id="cuisine"
-                        value={newRestaurant.cuisine}
+                        value={newRestaurant.cuisineType}
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
@@ -355,7 +393,7 @@ console.log(data);
                       <Label htmlFor="whatsAppNumber">WhatsApp Number</Label>
                       <Input
                         id="whatsAppNumber"
-                        value={newRestaurant.contactInfo.whatsAppNumber}
+                        value={newRestaurant.contactInfo.whatsApp}
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
@@ -494,48 +532,68 @@ console.log(data);
               </div>
 
               <div>
-                <Label htmlFor="image">Image</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  // value={restaurant.imageUrls ? restaurant.imageUrls[0] : ""}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      image: e.target.value,
-                    }))
-                  }
-                  className="mt-1"
-                />
-                {restaurant.images && (
-  <div className="mt-3">
-    {restaurant.images.map((img, index) => (
-      <div key={index} className="mb-2">
-        <img
-          src={img?.url}
-          alt={`Restaurant preview ${index + 1}`}
-          className="w-full h-32 object-cover rounded-lg border"
-        />
-        <p className="text-sm text-gray-600 mt-1">📄 {img.fileName}</p>
+  <Label htmlFor="image">Upload New Images</Label>
+  <Input
+    id="image"
+    type="file"
+    accept="image/*"
+    multiple
+    onChange={(e) => {
+      const files = Array.from(e.target.files || []);
+      setRestaurant((prev) => prev ? { ...prev, newImages: files } : prev);
+    }}
+  />
+</div>
+
+{/* Preview New Images */}
+{restaurant?.images?.length > 0 && (
+  <div className="mt-2 grid grid-cols-2 gap-4">
+    {restaurant.images.map((file, index) => (
+      <div key={index} className="text-sm text-gray-600">
+        📄 {file.fileName}
       </div>
     ))}
   </div>
 )}
 
-              </div>
+{/* Existing Images with Delete on Hover */}
+{restaurant.images?.length > 0 && (
+  <div className="mt-4 grid grid-cols-2 gap-4">
+    {restaurant.images.map((img) => (
+      <div key={img.id} className="relative group">
+        <img
+          src={img.url}
+          alt={img.fileName}
+          className="w-full h-32 object-cover rounded-lg border"
+        />
+        <p className="text-sm text-gray-600 mt-1">{img.fileName}</p>
+
+        {/* Delete Icon on Hover */}
+        <button
+          onClick={() => handleDeleteImage(img.id)}
+          className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
               <div>
                 <Label htmlFor="cuisine">Cuisine Type</Label>
                 <Input
                   id="cuisine"
                   value={restaurant.cuisineType}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      cuisine: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      cuisineType: e.target.value,
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
@@ -545,12 +603,18 @@ console.log(data);
                 <Input
                   id="streetName"
                   value={restaurant.address.streetName}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      streetName: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      address: {
+        ...prev.address,
+        streetName: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
@@ -560,12 +624,18 @@ console.log(data);
                 <Input
                   id="cityName"
                   value={restaurant.address.cityName}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      cityName: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      address: {
+        ...prev.address,
+        cityName: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
@@ -576,12 +646,18 @@ console.log(data);
                   id="email"
                   type="email"
                   value={restaurant.contactInfo.email}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      email: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+                setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      contactInfo: {
+        ...prev.contactInfo,
+        email: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
@@ -591,12 +667,18 @@ console.log(data);
                 <Input
                   id="phoneNumber"
                   value={restaurant.contactInfo.phone}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      phoneNumber: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      contactInfo: {
+        ...prev.contactInfo,
+        phone: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
@@ -606,27 +688,39 @@ console.log(data);
                 <Input
                   id="whatsAppNumber"
                   value={restaurant.contactInfo.whatsApp}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      whatsAppNumber: e.target.value,
-                    }))
-                  }
+                 onChange={(e) =>
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      contactInfo: {
+        ...prev.contactInfo,
+        whatsApp: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>
 
               <div>
-                <Label htmlFor="instagram">Instagram Handle</Label>
+                <Label htmlFor="instagram">Instagram</Label>
                 <Input
                   id="instagram"
                   value={restaurant.contactInfo.instagram}
                   onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      instagram: e.target.value,
-                    }))
-                  }
+  setRestaurant((prev) =>
+    prev ? {
+      ...prev,
+      contactInfo: {
+        ...prev.contactInfo,
+        instagram: e.target.value,
+      },
+    } : prev
+  )
+}
+
                   className="mt-1"
                 />
               </div>

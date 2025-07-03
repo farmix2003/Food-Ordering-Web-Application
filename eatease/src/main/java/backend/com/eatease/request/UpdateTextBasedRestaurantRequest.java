@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class UpdateTextBasedRestaurantRequest {
-    private Long id;
+
     private String name;
     private String description;
     private String cuisineType;

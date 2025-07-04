@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import MenuItemCard from "./MenuItem";
 import MenuItemModal from "./MenuItemModal";
 import { Edit, Plus, Save } from "lucide-react";
-import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant } from "../../server/server";
+import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant, updateRestaurantStatus } from "../../server/server";
 import { Trash2 } from "lucide-react"; 
 interface Image{
   id: number;
@@ -36,6 +36,7 @@ interface Restaurant {
   };
   openingHours: string;
   closingHours: string;
+  open: boolean;
 }
 
 interface MenuItem {
@@ -79,7 +80,7 @@ const RestaurantManagement = () => {
           setRestaurant(null);
         } else {
             setRestaurant(data)
-console.log(data);
+console.log("Data: ",data);
 
         }
        
@@ -276,6 +277,25 @@ const handleAddMenuItem = () => {
     setIsModalOpen(false);
     setEditingItem(null);
   };
+
+  const handleUpdateRestaurantStatus = async () => {
+    if (!restaurant) return;
+
+    try {
+      const updatedRestaurant = await updateRestaurantStatus(restaurant.id);
+      setRestaurant(updatedRestaurant);
+      toast({
+        title: "Restaurant Status Updated",
+        description: "The restaurant status has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update restaurant status",
+        variant: "destructive",
+      });
+    }
+  }
 
   if (!restaurant) {
     return (
@@ -522,10 +542,24 @@ const handleAddMenuItem = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Restaurant Management
-          </h1>
+        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+    <span
+      className={`px-3 py-1 text-sm rounded-full font-semibold ${
+        restaurant?.open ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
+      }`}
+    >
+      {restaurant?.open ? "Open" : "Closed"}
+    </span>
+    <Button
+      size="sm"
+      variant="outline"
+      className="px-1 text-white bg-orange-600 hover:bg-orange-700"
+      onClick={handleUpdateRestaurantStatus}
+    >
+      {restaurant?.open ? "Close" : "Open"}
+    </Button>
+  </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">

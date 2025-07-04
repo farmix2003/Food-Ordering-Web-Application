@@ -295,6 +295,15 @@ const deleteImageFromRestaurant = async (id: number, imagesId: number) => {
   return response.data;
 }
 
+const updateRestaurantStatus = async(id:number) =>{
+  const response = await axios.put(`/admin/restaurant/${id}/status`, {}, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
 export {
   loginUser,
   registerUser,
@@ -314,4 +323,5 @@ export {
   deleteRestaurant,
   addImageToRestaurant,
   deleteImageFromRestaurant,
+  updateRestaurantStatus,
 };

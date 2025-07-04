@@ -99,7 +99,27 @@ console.log(data);
   useEffect(() => {
     fetchRestaurant();
   }, []);
-
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const handleDeleteRestaurant = async () => {
+    if (!restaurant) return;
+  
+    try {
+      await deleteRestaurant(restaurant.id);
+      setRestaurant(null);
+      toast({
+        title: "Restaurant Deleted",
+        description: "The restaurant has been deleted successfully.",
+      });
+      setIsDeleteConfirmOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the restaurant.",
+        variant: "destructive",
+      });
+    }
+  };
+  
 
   const handleDeleteImage = async (imageId: number) => {
   try {
@@ -138,7 +158,6 @@ const handleSaveRestaurant = async () => {
 
     toast({ title: "Restaurant Updated", description: "All changes have been saved." });
     
-    // Optional: Refresh or reset `newImages`
     setRestaurant((prev) =>
       prev ? { ...prev, newImages: [] } : prev
     );
@@ -313,7 +332,7 @@ const handleAddMenuItem = () => {
                         onChange={(e) =>
                           setNewRestaurant((prev) => ({
                             ...prev,
-                            cuisine: e.target.value,
+                            cuisineType: e.target.value,
                           }))
                         }
                       />
@@ -399,7 +418,7 @@ const handleAddMenuItem = () => {
                             ...prev,
                             contactInfo:{
                               ...prev.contactInfo,
-                            whatsAppNumber: e.target.value,
+                            whatsApp: e.target.value,
                             }
                           }))
                         }
@@ -772,13 +791,53 @@ const handleAddMenuItem = () => {
                 />
               </div>
 
-              <Button
-                onClick={handleSaveRestaurant}
-                className="w-full text-white bg-orange-600 hover:bg-orange-700"
+              <div className="flex flex-col gap-2">
+  <Button
+    onClick={handleSaveRestaurant}
+    className="w-full text-white bg-orange-600 hover:bg-orange-700"
+  >
+    <Save className="h-4 w-4 mr-2" />
+    Save Restaurant Info
+  </Button>
+
+  <Button
+    variant="destructive"
+    onClick={() => setIsDeleteConfirmOpen(true)}
+    className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
+  >
+    <Trash2 className="h-4 w-4 mr-2" />
+    Delete Restaurant
+  </Button>
+</div>
+              <Dialog
+                open={isDeleteConfirmOpen}
+                onOpenChange={setIsDeleteConfirmOpen}
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save Restaurant Info
-              </Button>
+                <DialogContent className="sm:max-w-[400px] bg-white text-black">
+                  <DialogHeader>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                  </DialogHeader>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Are you sure you want to delete this restaurant? This action cannot be undone.
+                  </p>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDeleteConfirmOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteRestaurant}
+                      className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
+                    >
+                      Delete Restaurant
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
             </CardContent>
           </Card>
 

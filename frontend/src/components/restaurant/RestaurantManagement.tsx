@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import MenuItemCard from "./MenuItem";
 import MenuItemModal from "./MenuItemModal";
 import { Plus } from "lucide-react";
-import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant, updateRestaurantStatus, getExtrasByRestaurantId, getCategoriesByRestaurantId, addExtrasToMenuItem, addCategoryToRestaurant, addMenuItem } from "../../server/server"; 
+import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant, updateRestaurantStatus, getExtrasByRestaurantId, getCategoriesByRestaurantId, addExtrasToMenuItem, addCategoryToRestaurant, addMenuItem, getMenuItemsByRestaurantId } from "../../server/server"; 
 import AddNewRestaurantModal from "./AddNewRestaurantModal";
 import RestaurantForm from "./RestaurantForm";
 interface Image{
@@ -40,11 +40,19 @@ interface MenuItem {
   id: string;
   name: string;
   price: number;
-  image: string;
+  images: Image[];
   description: string;
   extras: { name: string; price: number }[];
 }
-
+interface NewMenuItem {
+  id: string;
+  name: string;
+  price: number;
+  image: File | Blob | null;
+  description: string;
+  categoryId: number | null;
+  extrasIds: number[];
+}
 const RestaurantManagement = () => {
   const [restaurant, setRestaurant] = useState<Restaurant & {newImages?:File[]} | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -52,6 +60,9 @@ const RestaurantManagement = () => {
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [extras, setExtras] = useState<{ id: number; name: string }[]>([]);
+const [categories, setCategories] = useState<{ id: number; categoryName: string }[]>([]);
+
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     description: "",
@@ -229,19 +240,39 @@ const handleSaveRestaurant = async () => {
   }
 };
 
-const handleAddMenuItem = () => {
+const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
     setEditingItem(null);
     setIsModalOpen(true);
-    const data = addMenuItem(
-      restaurant?.id || 0,
-      "",
-      0,
-      File.prototype,
-      "",
-      []
-    );
-  console.log("Adding new menu item");
-  console.log("Menu item data:", data);
+    console.log(restaurant?.id || 0,
+      item.name,
+      item.price,
+      item.image,
+      item.description,
+      item.extrasIds,
+      item.categoryId)
+    if (!item.image) {
+      toast({
+        title: "Error",
+        description: "Please select an image for the menu item.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try{
+      const data = addMenuItem(
+        restaurant?.id || 0,
+        item.name,
+        item.price,
+        item.image,
+        item.description,
+        item.extrasIds,
+        item.categoryId
+      );
+      console.log("Adding new menu item");
+      data.then(data => console.log(data))
+    }catch(e){
+      console.log("Error: ",e)
+    }
   };
 
   const handleEditMenuItem = (item: MenuItem) => {
@@ -255,34 +286,6 @@ const handleAddMenuItem = () => {
       title: "Menu Item Deleted",
       description: "The menu item has been removed successfully.",
     });
-  };
-
-  const handleSaveMenuItem = (item: Omit<MenuItem, "id">) => {
-    if (editingItem) {
-      setMenuItems((prev) =>
-        prev.map((menuItem) =>
-          menuItem.id === editingItem.id
-            ? { ...item, id: editingItem.id }
-            : menuItem
-        )
-      );
-      toast({
-        title: "Menu Item Updated",
-        description: "The menu item has been updated successfully.",
-      });
-    } else {
-      const newItem = {
-        ...item,
-        id: Date.now().toString(),
-      };
-      setMenuItems((prev) => [...prev, newItem]);
-      toast({
-        title: "Menu Item Added",
-        description: "New menu item has been added successfully.",
-      });
-    }
-    setIsModalOpen(false);
-    setEditingItem(null);
   };
 
   const handleUpdateRestaurantStatus = async () => {
@@ -308,29 +311,47 @@ const handleAddMenuItem = () => {
   const getExtras = () =>{
     const data = getExtrasByRestaurantId(restaurant?.id || 0);
     console.log("Extras data fetched:", data);
+    data.then(data => setExtras(data))
+  }
+  const getAllMenuItems = async() =>{
+    const data = await getMenuItemsByRestaurantId(restaurant?.id||0)
+    console.log(data);
   }
 
  const getCategories = async () => {
-  const data = getCategoriesByRestaurantId(restaurant?.id || 0);
+  const data = await getCategoriesByRestaurantId(restaurant?.id || 0);
   console.log("Categories data fetched:", data);
+  setCategories(data)
  }
   useEffect(() => {
     if (restaurant) {
       getExtras();
       getCategories();
+      getAllMenuItems()
     }
   }, [restaurant]);
 
-  const handleAddExtrasToMenuItem = (name: string, price:number) => {
-     const data = addExtrasToMenuItem(restaurant?.id || 0, name, price);
-     console.log("Extras added to menu item:", data);
+  const handleAddExtrasToMenuItem = async (name: string, price: number): Promise<number> => {
+    try {
+      const extraId = await addExtrasToMenuItem(restaurant?.id || 0, name, price);
+      console.log("Extras added to menu item:", extraId);
+      return extraId;
+    } catch (error) {
+      console.error("Failed to add extra to menu item:", error);
+      throw error;
+    }
   }
 
-  const handleAddCategoriesToMenuItem = (categorName: string) => {
-    const data = addCategoryToRestaurant(restaurant?.id || 0, categorName);
-    console.log("Category added to restaurant:", data);
+  const handleAddCategoriesToMenuItem = async (name: string): Promise<number> => {
+    try {
+      const categoryId = await addCategoryToRestaurant(restaurant?.id || 0, name);
+      console.log("Category added to restaurant:", categoryId);
+      return categoryId;
+    } catch (error) {
+      console.error("Failed to add category to restaurant:", error);
+      throw error;
+    }
   }
-
 
 
   if (!restaurant) {
@@ -411,7 +432,10 @@ const handleAddMenuItem = () => {
                   Menu Items ({menuItems.length})
                 </CardTitle>
                 <Button
-                  onClick={handleAddMenuItem}
+                  onClick={() => {
+                    setEditingItem(null);
+                    setIsModalOpen(true);
+                  }}
                   className="bg-green-600 text-white hover:bg-green-700"
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -442,14 +466,30 @@ const handleAddMenuItem = () => {
 
         {/* Add/Edit Menu Item Modal */}
         <MenuItemModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setEditingItem(null);
-          }}
-          onSave={handleSaveMenuItem}
-          editingItem={editingItem}
-        />
+  isOpen={isModalOpen}
+  onClose={() => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+  }}
+  onSave={handleAddMenuItem}
+  editingItem={
+    editingItem
+      ? {
+          id: editingItem.id,
+          name: editingItem.name,
+          price: editingItem.price,
+          image: null, // or convert from images[0] if you have a way to get File from URL
+          description: editingItem.description,
+          extras: editingItem.extras,
+        }
+      : null
+  }
+  extras={extras}
+  categories={categories}
+  onAddExtra={handleAddExtrasToMenuItem}
+  onAddCategory={handleAddCategoriesToMenuItem}
+/>
+
       </div>
     </div>
   );

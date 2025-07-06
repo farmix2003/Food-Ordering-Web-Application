@@ -3,11 +3,17 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
+interface Image{
+  id: number;
+  url: string;
+  fileName: string;
+}
+
 interface MenuItem {
   id: string;
   name: string;
   price: number;
-  image: string;
+  images: Image[];
   description: string;
   extras: { name: string; price: number }[];
 }
@@ -23,11 +29,14 @@ const MenuItemCard = ({ item, onEdit, onDelete }: MenuItemCardProps) => {
     <Card className="hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-4">
         <div className="flex gap-4">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-          />
+         {item?.images.map((img, i) =>(
+           <img
+           key={i}
+           src={img.url}
+           alt={item.name}
+           className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+         />
+         ))}
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <div>

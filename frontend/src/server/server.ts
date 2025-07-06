@@ -1,4 +1,3 @@
-import type React from "react";
 import axios from "./api.ts";
 
 const loginUser = async (email: string, password: string) => {
@@ -322,7 +321,9 @@ const addMenuItem = async (
   formData.append("description", description);
   formData.append("restaurantId", restaurantId.toString());
   if (extrasIds.length > 0) {
-    formData.append("extrasIds", JSON.stringify(extrasIds));
+    extrasIds.forEach(id =>{
+      formData.append("extrasIds", id.toString());
+    })
   }
   if (categoryId !== null) {
     formData.append("categoryId", categoryId.toString());

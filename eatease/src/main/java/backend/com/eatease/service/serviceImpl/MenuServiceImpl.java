@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,6 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @Transactional
     public Menu addFood(FoodRequest req, Restaurant restaurant) {
-
         if (req.getFoodName() == null || req.getFoodName().isEmpty()) {
             throw new IllegalArgumentException("Food name must not be null or empty.");
         }
@@ -48,42 +48,48 @@ public class MenuServiceImpl implements MenuService {
         newFood.setDescription(req.getDescription());
         newFood.setPrice(req.getPrice());
         newFood.setAvailable(true);
-        if (req.getCategoryId() != null){
-            Category category = categoryRepository.findById(req.getCategoryId()).orElseThrow(
-                    () -> new EntityNotFoundException("Category not found with id "+req.getCategoryId())
-            );
-          newFood.setCategory(category);
-        }else{
-         newFood.setCategory(null);
+        newFood.setCreationDate(new Date());
+
+        if (req.getCategoryId() != null) {
+            Category category = categoryRepository.findById(req.getCategoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id " + req.getCategoryId()));
+            newFood.setCategory(category);
         }
-        if (req.getExtrasIds() != null && !req.getExtrasIds().isEmpty()){
+
+        if (req.getExtrasIds() != null && !req.getExtrasIds().isEmpty()) {
             List<Extras> extras = extrasRepository.findAllById(req.getExtrasIds());
             newFood.setExtrasList(extras);
-        }else{
+        } else {
             newFood.setExtrasList(new ArrayList<>());
         }
 
+        Menu savedMenu = menuRepository.save(newFood);
 
-        List<Image> images =new ArrayList<>();
-        for (MultipartFile file : req.getImages()){
-         if (!file.isEmpty()){
-             try{
-                 Image image = new Image();
-                 image.setFileName(UUID.randomUUID()+file.getOriginalFilename());
-                 image.setFileType(file.getContentType());
-                 image.setData(file.getBytes());
-                 image.setCreatedAt(LocalDateTime.now());
-                 image.setMenu(newFood);
-                 images.add(image);
-             } catch (IOException e) {
-                 throw new RuntimeException(e);
-             }
-         }
+        List<Image> images = new ArrayList<>();
+        for (MultipartFile file : req.getImages()) {
+            if (!file.isEmpty()) {
+                try {
+                    Image image = new Image();
+                    image.setFileName(UUID.randomUUID() + file.getOriginalFilename());
+                    image.setFileType(file.getContentType());
+                    image.setData(file.getBytes());
+                    image.setCreatedAt(LocalDateTime.now());
+
+                    image.setMenu(savedMenu);
+                    image.setRestaurant(null);
+
+                    images.add(image);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to process image", e);
+                }
+            }
         }
-        imageRepository.saveAll(images);
-        newFood.setImagesList(images);
 
-        return menuRepository.save(newFood);
+        // Save images
+        imageRepository.saveAll(images);
+        savedMenu.setImagesList(images);
+
+        return savedMenu;
     }
 
     @Override

@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Plus, X, Save } from "lucide-react";
-// import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+// --- MenuItemModal.tsx ---
+import { useEffect, useState } from "react";
+import { Plus, Save, X } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 
 interface MenuItem {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image: File | null;
   description: string;
   extras: { name: string; price: number }[];
 }
@@ -20,8 +20,12 @@ interface MenuItem {
 interface MenuItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: Omit<MenuItem, "id">) => void;
+  onSave: (item: Omit<MenuItem, "id"> & { extrasIds: number[]; categoryId: number | null }) => void;
   editingItem: MenuItem | null;
+  extras: { id: number; name: string }[];
+  categories: { id: number; categoryName: string }[];
+  onAddExtra: (name: string, price: number) => Promise<number>;
+  onAddCategory: (name: string) => Promise<number>;
 }
 
 const MenuItemModal = ({
@@ -29,240 +33,170 @@ const MenuItemModal = ({
   onClose,
   onSave,
   editingItem,
+  extras,
+  categories,
+  onAddExtra,
+  onAddCategory,
 }: MenuItemModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
-    price: "",
-    image: "",
+    price: 0,
+    image: null as File | null,
     description: "",
-    extras: [{ name: "", price: "" }],
+    extras: [{ name: "", price: 0 }],
   });
+  const [selectedExtrasIds, setSelectedExtrasIds] = useState<number[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   useEffect(() => {
     if (editingItem) {
       setFormData({
         name: editingItem.name,
-        price: editingItem.price.toString(),
-        image: editingItem.image,
+        price: editingItem.price,
+        image: editingItem.image as File | null,
         description: editingItem.description,
-        extras:
-          editingItem.extras.length > 0
-            ? editingItem.extras.map((extra) => ({
-                name: extra.name,
-                price: extra.price.toString(),
-              }))
-            : [{ name: "", price: "" }],
+        extras: editingItem.extras,
       });
     } else {
-      setFormData({
-        name: "",
-        price: "",
-        image: "",
-        description: "",
-        extras: [{ name: "", price: "" }],
-      });
+      setFormData({ name: "", price: 0, image: null, description: "", extras: [{ name: "", price: 0 }] });
     }
+    setSelectedExtrasIds([]);
+    setSelectedCategoryId(null);
+    setNewCategoryName("");
   }, [editingItem, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validExtras = formData.extras
-      .filter((extra) => extra.name.trim() !== "" && extra.price.trim() !== "")
-      .map((extra) => ({
-        name: extra.name.trim(),
-        price: parseFloat(extra.price),
-      }));
+    const validExtras = formData.extras.filter((e) => e.name && e.price);
+    const newExtraIds: number[] = [];
 
-    const menuItem = {
+    for (const extra of validExtras) {
+      const id = await onAddExtra(extra.name, extra.price);
+      newExtraIds.push(id);
+    }
+
+    let categoryIdToUse = selectedCategoryId;
+    if (!selectedCategoryId && newCategoryName.trim()) {
+      categoryIdToUse = await onAddCategory(newCategoryName.trim());
+    }
+
+    onSave({
       name: formData.name,
-      price: parseFloat(formData.price),
+      price: formData.price,
       image: formData.image,
       description: formData.description,
-      extras: validExtras,
-    };
-
-    onSave(menuItem);
-  };
-
-  const addExtraRow = () => {
-    setFormData((prev) => ({
-      ...prev,
-      extras: [...prev.extras, { name: "", price: "" }],
-    }));
-  };
-
-  const removeExtraRow = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      extras: prev.extras.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateExtra = (
-    index: number,
-    field: "name" | "price",
-    value: string
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      extras: prev.extras.map((extra, i) =>
-        i === index ? { ...extra, [field]: value } : extra
-      ),
-    }));
+      extras:[],
+      extrasIds: [...selectedExtrasIds, ...newExtraIds],
+      categoryId: categoryIdToUse,
+    });
   };
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* <DialogHeader> */}
-        <DialogTitle>
-          {editingItem ? "Edit Menu Item" : "Add New Menu Item"}
-        </DialogTitle>
-        {/* </DialogHeader> */}
-
+        <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Item Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                required
-                className="mt-1"
-              />
+              <Label>Item Name *</Label>
+              <Input value={formData.name} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} required />
             </div>
             <div>
-              <Label htmlFor="price">Price ($) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, price: e.target.value }))
-                }
-                required
-                className="mt-1"
-              />
+              <Label>Price *</Label>
+              <Input type="number"  value={formData.price} onChange={(e) => setFormData((p) => ({ ...p, price: Number(e.target.value) }))} required />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="image">Image URL</Label>
-            <Input
-              id="image"
-              value={formData.image}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, image: e.target.value }))
-              }
-              className="mt-1"
-            />
-            {formData.image && (
-              <div className="mt-3">
-                <img
-                  src={formData.image}
-                  alt="Preview"
-                  className="w-full h-32 object-cover rounded-lg border"
-                />
-              </div>
-            )}
+            <Label>Image</Label>
+            <Input type="file" accept="image/*" onChange={(e) => setFormData((p) => ({ ...p, image: e.target.files?.[0] || null }))} />
+            {formData.image && <p className="text-sm mt-1">{formData.image.name}</p>}
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              className="mt-1"
-              rows={3}
-            />
+            <Label>Description</Label>
+            <Textarea rows={3} value={formData.description} onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))} />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <Label>Extras</Label>
-              <Button
-                type="button"
-                onClick={addExtraRow}
-                size="sm"
-                variant="outline"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Extra
-              </Button>
-            </div>
-
+            <Label>Extras</Label>
             <Card>
-              <CardContent className="p-4 space-y-3">
+              <CardContent className="space-y-3 p-4">
                 {formData.extras.map((extra, index) => (
                   <div key={index} className="flex gap-2 items-center">
-                    <Input
-                      placeholder="Extra name (e.g., Extra Cheese)"
-                      value={extra.name}
-                      onChange={(e) =>
-                        updateExtra(index, "name", e.target.value)
-                      }
-                      className="flex-1"
-                    />
-                    <Input
-                      placeholder="Price"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={extra.price}
-                      onChange={(e) =>
-                        updateExtra(index, "price", e.target.value)
-                      }
-                      className="w-24"
-                    />
-                    {formData.extras.length > 1 && (
-                      <Button
-                        type="button"
-                        onClick={() => removeExtraRow(index)}
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Input placeholder="Name" value={extra.name} onChange={(e) => {
+                      const newExtras = [...formData.extras];
+                      newExtras[index].name = e.target.value;
+                      setFormData((p) => ({ ...p, extras: newExtras }));
+                    }} />
+                    <Input type="number" placeholder="Price" value={extra.price} onChange={(e) => {
+                      const newExtras = [...formData.extras];
+                      newExtras[index].price = parseFloat(e.target.value);
+                      setFormData((p) => ({ ...p, extras: newExtras }));
+                    }} />
+                    <Button type="button" variant="ghost" onClick={() => {
+                      const newExtras = formData.extras.filter((_, i) => i !== index);
+                      setFormData((p) => ({ ...p, extras: newExtras }));
+                    }}><X className="w-4 h-4 text-red-600" /></Button>
                   </div>
                 ))}
-                {formData.extras.length === 0 && (
-                  <p className="text-gray-500 text-sm text-center py-2">
-                    No extras added yet
-                  </p>
-                )}
+                <Button type="button" variant="outline" onClick={() => setFormData((p) => ({ ...p, extras: [...p.extras, { name: "", price: 0 }] }))}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Extra
+                </Button>
               </CardContent>
             </Card>
           </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              className="flex-1"
+          <div>
+            <Label>Attach Existing Extras</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {extras.map((extra) => (
+                <label key={extra.id} className="flex gap-2 items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedExtrasIds.includes(extra.id)}
+                    onChange={() =>
+                      setSelectedExtrasIds((prev) =>
+                        prev.includes(extra.id) ? prev.filter((id) => id !== extra.id) : [...prev, extra.id]
+                      )
+                    }
+                  />
+                  {extra.name}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Category</Label>
+            <select
+              className="w-full mt-1 border rounded px-3 py-2"
+              value={selectedCategoryId ?? ""}
+              onChange={(e) => setSelectedCategoryId(Number(e.target.value) || null)}
             >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.categoryName}</option>
+              ))}
+            </select>
+            <div className="mt-2">
+              <Label>Or Add New Category</Label>
+              <Input
+                placeholder="New Category Name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="button" onClick={onClose} variant="outline" className="flex-1">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1 text-white bg-orange-600 hover:bg-orange-700"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {editingItem ? "Update Item" : "Add Item"}
+            <Button type="submit" className="flex-1 bg-orange-600 text-white hover:bg-orange-700">
+              <Save className="w-4 h-4 mr-2" /> {editingItem ? "Update Item" : "Add Item"}
             </Button>
           </div>
         </form>

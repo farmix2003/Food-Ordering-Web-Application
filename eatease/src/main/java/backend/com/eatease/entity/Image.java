@@ -31,10 +31,11 @@
     
         @ManyToOne
         @JoinColumn(name = "restaurant_id")
-        @JsonBackReference
+        @JsonBackReference("restaurant_id")
         private Restaurant restaurant;
     
         @ManyToOne
         @JoinColumn(name = "menu_id")
+        @JsonBackReference("menu_id")
         private Menu menu;
     }

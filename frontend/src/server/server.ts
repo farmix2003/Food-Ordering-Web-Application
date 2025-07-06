@@ -168,6 +168,7 @@ const getRestaurantByUserId = async () => {
   if (response.status !== 200) {
     throw new Error("Failed to fetch restaurant data");
   }
+  console.log("Restaurant data fetched successfully:", response.data);
   return response.data;
 
 }
@@ -304,6 +305,88 @@ const updateRestaurantStatus = async(id:number) =>{
   return response.data;
 }
 
+
+const addMenuItem = async (
+  restaurantId:number, 
+  foodName: string,
+  price: number,
+  images: File | Blob,
+  description: string,
+  extrasIds: number[] = [],
+  categoryId: number | null = null
+) =>{
+  const formData = new FormData();
+  formData.append("foodName", foodName);
+  formData.append("price", price.toString());
+  formData.append("images", images);
+  formData.append("description", description);
+  formData.append("restaurantId", restaurantId.toString());
+  if (extrasIds.length > 0) {
+    formData.append("extrasIds", JSON.stringify(extrasIds));
+  }
+  if (categoryId !== null) {
+    formData.append("categoryId", categoryId.toString());
+  }
+  const response = await axios.post(`/admin/${restaurantId}/add-food`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
+const getMenuItemsByRestaurantId = async (restaurantId: number) => {
+  const response = await axios.get(`/admin/menu/${restaurantId}`, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
+const addCategoryToRestaurant = async (restaurantId:number, categoryName:string) =>{
+   const response = await axios.post(`/admin/category/${restaurantId}/add`, 
+    { categoryName },
+    {
+      headers: {
+        Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+const getCategoriesByRestaurantId = async (restaurantId: number) => {
+  const response = await axios.get(`/admin/category/${restaurantId}`, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+};
+
+const addExtrasToMenuItem = async (restaurantId:number, name:string,price:number) =>{
+  const response = await axios.post(
+    `/admin/extras/${restaurantId}/add`,
+    { name, price },
+    {
+      headers: {
+        Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return response.data;
+}
+const getExtrasByRestaurantId = async (restaurantId: number) => {
+  const response = await axios.get(`/admin/extras/${restaurantId}`, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+  });
+  return response.data;
+}
+
 export {
   loginUser,
   registerUser,
@@ -324,4 +407,10 @@ export {
   addImageToRestaurant,
   deleteImageFromRestaurant,
   updateRestaurantStatus,
+  addMenuItem,
+  addCategoryToRestaurant,
+  getCategoriesByRestaurantId,
+  addExtrasToMenuItem,
+  getMenuItemsByRestaurantId,
+  getExtrasByRestaurantId,
 };

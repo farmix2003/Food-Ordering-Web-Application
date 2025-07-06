@@ -56,5 +56,6 @@ public class Restaurant {
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Menu> foods = new ArrayList<>();
 }

@@ -28,7 +28,7 @@ public class RestaurantDto {
     private Long ownerId;
     private String ownerUsername;
 
-    private List<Menu> foods;         // Directly using entity
-    private List<Order> orders;       // Directly using entity
-    private List<ImageResponse> images;   // For frontend display
+    private List<Menu> foods;
+    private List<Order> orders;
+    private List<ImageResponse> images;
 }

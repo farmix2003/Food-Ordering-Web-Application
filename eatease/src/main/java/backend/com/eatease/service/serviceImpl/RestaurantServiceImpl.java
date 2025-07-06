@@ -1,15 +1,9 @@
 package backend.com.eatease.service.serviceImpl;
 
 import backend.com.eatease.dto.RestaurantDto;
-import backend.com.eatease.entity.Address;
-import backend.com.eatease.entity.Image;
-import backend.com.eatease.entity.Restaurant;
-import backend.com.eatease.entity.User;
+import backend.com.eatease.entity.*;
 import backend.com.eatease.exception.RestaurantNotFoundException;
-import backend.com.eatease.repository.AddressRepository;
-import backend.com.eatease.repository.ImageRepository;
-import backend.com.eatease.repository.RestaurantRepository;
-import backend.com.eatease.repository.UserRepository;
+import backend.com.eatease.repository.*;
 import backend.com.eatease.request.RestaurantRequest;
 import backend.com.eatease.request.UpdateTextBasedRestaurantRequest;
 import backend.com.eatease.response.ImageResponse;
@@ -42,6 +36,14 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private MenuRepository menuRepository;
+
+    @Autowired private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ExtrasRepository extrasRepository;
 
     @Override
     @Transactional
@@ -150,6 +152,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public Restaurant getRestaurantById(Long id) throws Exception {
+
         return restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with id" +id));
     }
@@ -165,9 +168,30 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public void deleteRestaurant(Long id) throws Exception {
         Restaurant restaurant = getRestaurantById(id);
-        restaurantRepository.delete(restaurant);
 
+        // Clear child entities manually
+        List<Menu> menus = menuRepository.findAllByRestaurantId(restaurant.getId());
+        for (Menu menu : menus) {
+            // You might also want to delete images and extras linked to this menu
+            menu.getImagesList().clear();
+            menu.getExtrasList().clear();
+            menuRepository.delete(menu);
+        }
+
+        List<Category> categories = categoryRepository.findAllByRestaurantId(restaurant.getId());
+        for (Category category : categories) {
+            categoryRepository.delete(category);
+        }
+
+        List<Extras> extras = extrasRepository.findAllByRestaurantId(restaurant.getId());
+        for (Extras extra : extras) {
+            extrasRepository.delete(extra);
+        }
+
+        // Now it's safe to delete restaurant
+        restaurantRepository.delete(restaurant);
     }
+
 
     @Override
     public List<Restaurant> searchRestaurants(String keyword) throws Exception {

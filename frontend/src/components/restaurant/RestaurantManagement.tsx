@@ -2,15 +2,12 @@ import { useEffect, useState } from "react";
 import { toast } from "../../hooks/use-toast";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import MenuItemCard from "./MenuItem";
 import MenuItemModal from "./MenuItemModal";
-import { Edit, Plus, Save } from "lucide-react";
-import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant, updateRestaurantStatus } from "../../server/server";
-import { Trash2 } from "lucide-react"; 
+import { Plus } from "lucide-react";
+import { getRestaurantByUserId, createRestaurant, deleteRestaurant, addImageToRestaurant, updateRestaurant, deleteImageFromRestaurant, updateRestaurantStatus, getExtrasByRestaurantId, getCategoriesByRestaurantId, addExtrasToMenuItem, addCategoryToRestaurant, addMenuItem } from "../../server/server"; 
+import AddNewRestaurantModal from "./AddNewRestaurantModal";
+import RestaurantForm from "./RestaurantForm";
 interface Image{
   id: number;
   url: string;
@@ -54,6 +51,7 @@ const RestaurantManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddRestaurantModalOpen, setIsAddRestaurantModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     description: "",
@@ -100,7 +98,7 @@ console.log("Data: ",data);
   useEffect(() => {
     fetchRestaurant();
   }, []);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  
   const handleDeleteRestaurant = async () => {
     if (!restaurant) return;
   
@@ -121,7 +119,6 @@ console.log("Data: ",data);
     }
   };
   
-
   const handleDeleteImage = async (imageId: number) => {
   try {
     await deleteImageFromRestaurant(restaurant?.id || 0, imageId);
@@ -235,6 +232,16 @@ const handleSaveRestaurant = async () => {
 const handleAddMenuItem = () => {
     setEditingItem(null);
     setIsModalOpen(true);
+    const data = addMenuItem(
+      restaurant?.id || 0,
+      "",
+      0,
+      File.prototype,
+      "",
+      []
+    );
+  console.log("Adding new menu item");
+  console.log("Menu item data:", data);
   };
 
   const handleEditMenuItem = (item: MenuItem) => {
@@ -297,6 +304,35 @@ const handleAddMenuItem = () => {
     }
   }
 
+
+  const getExtras = () =>{
+    const data = getExtrasByRestaurantId(restaurant?.id || 0);
+    console.log("Extras data fetched:", data);
+  }
+
+ const getCategories = async () => {
+  const data = getCategoriesByRestaurantId(restaurant?.id || 0);
+  console.log("Categories data fetched:", data);
+ }
+  useEffect(() => {
+    if (restaurant) {
+      getExtras();
+      getCategories();
+    }
+  }, [restaurant]);
+
+  const handleAddExtrasToMenuItem = (name: string, price:number) => {
+     const data = addExtrasToMenuItem(restaurant?.id || 0, name, price);
+     console.log("Extras added to menu item:", data);
+  }
+
+  const handleAddCategoriesToMenuItem = (categorName: string) => {
+    const data = addCategoryToRestaurant(restaurant?.id || 0, categorName);
+    console.log("Category added to restaurant:", data);
+  }
+
+
+
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
@@ -318,221 +354,13 @@ const handleAddMenuItem = () => {
               Add Restaurant
             </Button>
           </div>
-
-          <Dialog
-            open={isAddRestaurantModalOpen}
-            onOpenChange={setIsAddRestaurantModalOpen}
-          >
-            <DialogContent className="sm:max-w-[600px] bg-white">
-              <DialogHeader>
-                <DialogTitle>Add New Restaurant</DialogTitle>
-              </DialogHeader>
-              <div className="max-h-[60vh] overflow-y-auto pr-4">
-                <div className="grid gap-4 py-4">
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="name">Restaurant Name</Label>
-                      <Input
-                        id="name"
-                        value={newRestaurant.name}
-                        className="outline-none"
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            name: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="cuisine">Cuisine Type</Label>
-                      <Input
-                        id="cuisine"
-                        value={newRestaurant.cuisineType}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            cuisineType: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="streetName">Street Name</Label>
-                      <Input
-                        id="streetName"
-                        value={newRestaurant.address.streetName}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            address:{
-                               ...prev.address,
-                              streetName: e.target.value,
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="cityName">City Name</Label>
-                      <Input
-                        id="cityName"
-                        value={newRestaurant.address.cityName}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            address:{
-                              ...prev.address,
-                            cityName: e.target.value,
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={newRestaurant.contactInfo.email}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            contactInfo:{
-                              ...prev.contactInfo,
-                              email: e.target.value,
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="phoneNumber">Phone Number</Label>
-                      <Input
-                        id="phoneNumber"
-                        value={newRestaurant.contactInfo.phoneNumber}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            contactInfo:{
-                              ...prev.contactInfo,
-                              phoneNumber: e.target.value,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="whatsAppNumber">WhatsApp Number</Label>
-                      <Input
-                        id="whatsAppNumber"
-                        value={newRestaurant.contactInfo.whatsApp}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            contactInfo:{
-                              ...prev.contactInfo,
-                            whatsApp: e.target.value,
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="instagram">Instagram Account</Label>
-                      <Input
-                        id="instagram"
-                        value={newRestaurant.contactInfo.instagram}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            contactInfo:{
-                              ...prev.contactInfo,
-                            instagram: e.target.value,
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="openingHours">Opening Hours</Label>
-                      <Input
-                        id="openingHours"
-                        value={newRestaurant.openingHours}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            openingHours: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex-1 min-w-[250px]">
-                      <Label htmlFor="closingHours">Closing Hours</Label>
-                      <Input
-                        id="closingHours"
-                        value={newRestaurant.closingHours}
-                        onChange={(e) =>
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            closingHours: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <Label htmlFor="image">Image</Label>
-                    <Input
-                      id="image"
-                      type={"file"}
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setNewRestaurant((prev) => ({
-                            ...prev,
-                            image: file,
-                          }));
-                        }
-                      } }
-                    />
-                  </div>
-                  <div className="w-full">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newRestaurant.description}
-                      onChange={(e) =>
-                        setNewRestaurant((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                      rows={4}
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsAddRestaurantModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateRestaurant}>Create Restaurant</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+        <AddNewRestaurantModal
+  isOpen={isAddRestaurantModalOpen}
+  onClose={() => setIsAddRestaurantModalOpen(false)}
+  onSave={handleCreateRestaurant}
+  newRestaurant={newRestaurant}
+  setNewRestaurant={setNewRestaurant}
+/>
         </div>
       </div>
     );
@@ -562,318 +390,18 @@ const handleAddMenuItem = () => {
   </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+         <div className="grid lg:grid-cols-2 gap-8">
           {/* Restaurant Info Section */}
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Edit className="h-5 w-5 mr-2" />
-                Restaurant Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="name">Restaurant Name</Label>
-                <Input
-                  id="name"
-                  value={restaurant.name}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({ ...prev!, name: e.target.value }))
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-  <Label htmlFor="image">Upload New Images</Label>
-  <Input
-    id="image"
-    type="file"
-    accept="image/*"
-    multiple
-    onChange={(e) => {
-      const files = Array.from(e.target.files || []);
-      setRestaurant((prev) => prev ? { ...prev, newImages: files } : prev);
-    }}
-  />
-</div>
-
-{/* Preview New Images */}
-{restaurant?.images?.length > 0 && (
-  <div className="mt-2 grid grid-cols-2 gap-4">
-    {restaurant.images.map((file, index) => (
-      <div key={index} className="text-sm text-gray-600">
-        📄 {file.fileName}
-      </div>
-    ))}
-  </div>
-)}
-
-{/* Existing Images with Delete on Hover */}
-{restaurant.images?.length > 0 && (
-  <div className="mt-4 grid grid-cols-2 gap-4">
-    {restaurant.images.map((img) => (
-      <div key={img.id} className="relative group">
-        <img
-          src={img.url}
-          alt={img.fileName}
-          className="w-full h-32 object-cover rounded-lg border"
+          <RestaurantForm 
+        onSave={handleSaveRestaurant}
+        onDelete={handleDeleteRestaurant}
+        handleDeleteImage={handleDeleteImage}
+        isOpen={isDeleteConfirmOpen}
+        setIsOpen={setIsDeleteConfirmOpen}
+        restaurant={restaurant}
+        setRestaurant={setRestaurant}
         />
-        <p className="text-sm text-gray-600 mt-1">{img.fileName}</p>
-
-        {/* Delete Icon on Hover */}
-        <button
-          onClick={() => handleDeleteImage(img.id)}
-          className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-    ))}
-  </div>
-)}
-
-              <div>
-                <Label htmlFor="cuisine">Cuisine Type</Label>
-                <Input
-                  id="cuisine"
-                  value={restaurant.cuisineType}
-                 onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      cuisineType: e.target.value,
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="streetName">Street Name</Label>
-                <Input
-                  id="streetName"
-                  value={restaurant.address.streetName}
-                 onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      address: {
-        ...prev.address,
-        streetName: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="cityName">City Name</Label>
-                <Input
-                  id="cityName"
-                  value={restaurant.address.cityName}
-                 onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      address: {
-        ...prev.address,
-        cityName: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={restaurant.contactInfo.email}
-                 onChange={(e) =>
-                setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      contactInfo: {
-        ...prev.contactInfo,
-        email: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input
-                  id="phoneNumber"
-                  value={restaurant.contactInfo.phone}
-                 onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      contactInfo: {
-        ...prev.contactInfo,
-        phone: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="whatsAppNumber">WhatsApp Number</Label>
-                <Input
-                  id="whatsAppNumber"
-                  value={restaurant.contactInfo.whatsApp}
-                 onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      contactInfo: {
-        ...prev.contactInfo,
-        whatsApp: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="instagram">Instagram</Label>
-                <Input
-                  id="instagram"
-                  value={restaurant.contactInfo.instagram}
-                  onChange={(e) =>
-  setRestaurant((prev) =>
-    prev ? {
-      ...prev,
-      contactInfo: {
-        ...prev.contactInfo,
-        instagram: e.target.value,
-      },
-    } : prev
-  )
-}
-
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="openingHours">Opening Hours</Label>
-                <Input
-                  id="openingHours"
-                  value={restaurant.openingHours}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      openingHours: e.target.value,
-                    }))
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="closingHours">Closing Hours</Label>
-                <Input
-                  id="closingHours"
-                  value={restaurant.closingHours}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      closingHours: e.target.value,
-                    }))
-                  }
-                  className="mt-1"
-                />
-              </div>
-
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={restaurant.description}
-                  onChange={(e) =>
-                    setRestaurant((prev) => ({
-                      ...prev!,
-                      description: e.target.value,
-                    }))
-                  }
-                  className="mt-1"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-  <Button
-    onClick={handleSaveRestaurant}
-    className="w-full text-white bg-orange-600 hover:bg-orange-700"
-  >
-    <Save className="h-4 w-4 mr-2" />
-    Save Restaurant Info
-  </Button>
-
-  <Button
-    variant="destructive"
-    onClick={() => setIsDeleteConfirmOpen(true)}
-    className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
-  >
-    <Trash2 className="h-4 w-4 mr-2" />
-    Delete Restaurant
-  </Button>
-</div>
-              <Dialog
-                open={isDeleteConfirmOpen}
-                onOpenChange={setIsDeleteConfirmOpen}
-              >
-                <DialogContent className="sm:max-w-[400px] bg-white text-black">
-                  <DialogHeader>
-                    <DialogTitle>Confirm Deletion</DialogTitle>
-                  </DialogHeader>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Are you sure you want to delete this restaurant? This action cannot be undone.
-                  </p>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsDeleteConfirmOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={handleDeleteRestaurant}
-                      className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
-                    >
-                      Delete Restaurant
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-            </CardContent>
-          </Card>
+       
 
           {/* Menu Management Section */}
           <Card className="shadow-lg">
@@ -910,6 +438,7 @@ const handleAddMenuItem = () => {
             </CardContent>
           </Card>
         </div>
+        
 
         {/* Add/Edit Menu Item Modal */}
         <MenuItemModal

@@ -1,5 +1,6 @@
 package backend.com.eatease.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,7 @@ public class Menu {
     private boolean isAvailable;
 
     @ManyToOne
+    @JsonBackReference
     private Restaurant restaurant;
 
     @ManyToMany

@@ -169,10 +169,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     public void deleteRestaurant(Long id) throws Exception {
         Restaurant restaurant = getRestaurantById(id);
 
-        // Clear child entities manually
         List<Menu> menus = menuRepository.findAllByRestaurantId(restaurant.getId());
         for (Menu menu : menus) {
-            // You might also want to delete images and extras linked to this menu
             menu.getImagesList().clear();
             menu.getExtrasList().clear();
             menuRepository.delete(menu);
@@ -188,7 +186,6 @@ public class RestaurantServiceImpl implements RestaurantService {
             extrasRepository.delete(extra);
         }
 
-        // Now it's safe to delete restaurant
         restaurantRepository.delete(restaurant);
     }
 

@@ -14,7 +14,6 @@ interface Image{
   fileName: string;
 }
 
-
 interface Restaurant {
   id: number;
   name: string;
@@ -38,11 +37,15 @@ interface Restaurant {
 
 interface MenuItem {
   id: string;
-  name: string;
+  foodName: string;
   price: number;
   images: Image[];
   description: string;
-  extras: { name: string; price: number }[];
+  extrasList: { name: string; price: number }[];
+  available:boolean;
+  categoryName:string;
+  restaurantId:number;
+
 }
 interface NewMenuItem {
   id: string;
@@ -93,7 +96,7 @@ console.log("Data: ",data);
 
         }
        
-      console.log(restaurant);
+      // console.log(restaurant);
       
       
       } catch (error) {
@@ -270,6 +273,7 @@ const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
       );
       console.log("Adding new menu item");
       data.then(data => console.log(data))
+      setIsModalOpen(false)
     }catch(e){
       console.log("Error: ",e)
     }
@@ -310,17 +314,17 @@ const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
 
   const getExtras = () =>{
     const data = getExtrasByRestaurantId(restaurant?.id || 0);
-    console.log("Extras data fetched:", data);
+    // console.log("Extras data fetched:", data);
     data.then(data => setExtras(data))
   }
   const getAllMenuItems = async() =>{
     const data = await getMenuItemsByRestaurantId(restaurant?.id||0)
-    console.log(data);
+    setMenuItems(data)
   }
 
  const getCategories = async () => {
   const data = await getCategoriesByRestaurantId(restaurant?.id || 0);
-  console.log("Categories data fetched:", data);
+  // console.log("Categories data fetched:", data);
   setCategories(data)
  }
   useEffect(() => {
@@ -476,14 +480,15 @@ const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
     editingItem
       ? {
           id: editingItem.id,
-          name: editingItem.name,
+          name: editingItem.foodName,
           price: editingItem.price,
-          image: null, // or convert from images[0] if you have a way to get File from URL
+          image: null,
           description: editingItem.description,
-          extras: editingItem.extras,
+          extras: editingItem.extrasList,
         }
-      : null
-  }
+        : null
+      }
+    existingImages={menuItems.flatMap(menu => menu.images)}
   extras={extras}
   categories={categories}
   onAddExtra={handleAddExtrasToMenuItem}

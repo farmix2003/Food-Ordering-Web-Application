@@ -11,11 +11,15 @@ interface Image{
 
 interface MenuItem {
   id: string;
-  name: string;
+  foodName: string;
   price: number;
   images: Image[];
   description: string;
-  extras: { name: string; price: number }[];
+  extrasList: { name: string; price: number }[];
+  available:boolean;
+  categoryName:string;
+  restaurantId:number;
+
 }
 
 interface MenuItemCardProps {
@@ -25,22 +29,23 @@ interface MenuItemCardProps {
 }
 
 const MenuItemCard = ({ item, onEdit, onDelete }: MenuItemCardProps) => {
+  console.log("Item: ",item)
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-4">
         <div className="flex gap-4">
-         {item?.images.map((img, i) =>(
+         {item?.images?.map((img, i) =>(
            <img
            key={i}
            src={img.url}
-           alt={item.name}
+           alt={item.foodName}
            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
          />
          ))}
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-semibold text-lg">{item.name}</h3>
+                <h3 className="font-semibold text-lg">{item.foodName}</h3>
                 <p className="text-2xl font-bold text-orange-600">
                   ${item.price.toFixed(2)}
                 </p>
@@ -67,13 +72,13 @@ const MenuItemCard = ({ item, onEdit, onDelete }: MenuItemCardProps) => {
             <p className="text-gray-600 text-sm mt-1 line-clamp-2">
               {item.description}
             </p>
-            {item.extras.length > 0 && (
+            {item.extrasList.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Extras:
                 </p>
                 <div className="flex flex-wrap gap-1">
-                  {item.extras.map((extra, index) => (
+                  {item.extrasList.map((extra, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {extra.name} (+${extra.price.toFixed(2)})
                     </Badge>

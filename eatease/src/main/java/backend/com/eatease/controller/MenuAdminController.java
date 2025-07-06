@@ -1,5 +1,6 @@
 package backend.com.eatease.controller;
 
+import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.entity.Menu;
 import backend.com.eatease.entity.Restaurant;
 import backend.com.eatease.request.FoodRequest;
@@ -44,18 +45,18 @@ public class MenuAdminController {
     }
 
     @GetMapping("/menu/{id}")
-    public ResponseEntity<List<Menu>> getFoodsByRestaurantId(
+    public ResponseEntity<List<MenuDto>> getFoodsByRestaurantId(
             @PathVariable Long id
     ) throws Exception {
-        List<Menu> menus = menuService.getAllFoods(id);
+        List<MenuDto> menus = menuService.getAllFoods(id);
         return ResponseEntity.ok().body(menus);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Menu>> searchMenu(@RequestHeader("Authorization") String jwt,
+    public ResponseEntity<List<MenuDto>> searchMenu(@RequestHeader("Authorization") String jwt,
                                                  @RequestParam("keyword") String keyword
     ) throws Exception {
-        List<Menu> menus = menuService.searchFood(keyword);
+        List<MenuDto> menus = menuService.searchFood(keyword);
         return ResponseEntity.ok().body(menus);
     }
 

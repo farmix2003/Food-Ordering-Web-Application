@@ -1,12 +1,17 @@
-// --- MenuItemModal.tsx ---
 import { useEffect, useState } from "react";
-import { Plus, Save, X } from "lucide-react";
+import { Plus, Save, Trash2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+
+interface Image{
+  id:number;
+  url:string;
+  fileName:string
+}
 
 interface MenuItem {
   id: string;
@@ -26,6 +31,7 @@ interface MenuItemModalProps {
   categories: { id: number; categoryName: string }[];
   onAddExtra: (name: string, price: number) => Promise<number>;
   onAddCategory: (name: string) => Promise<number>;
+  existingImages:Image[]
 }
 
 const MenuItemModal = ({
@@ -37,6 +43,7 @@ const MenuItemModal = ({
   categories,
   onAddExtra,
   onAddCategory,
+  existingImages
 }: MenuItemModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -113,6 +120,25 @@ const MenuItemModal = ({
             <Label>Image</Label>
             <Input type="file" accept="image/*" onChange={(e) => setFormData((p) => ({ ...p, image: e.target.files?.[0] || null }))} />
             {formData.image && <p className="text-sm mt-1">{formData.image.name}</p>}
+            {existingImages.map((img)=>(
+              <div key={img.id} className="relative group mt-2">
+              <img
+                src={img.url}
+                alt={img.fileName}
+                className="w-full h-32 object-cover rounded-lg border"
+              />
+              <p className="text-sm text-gray-600 mt-1">{img.fileName}</p>
+      
+              {/* Delete Icon on Hover */}
+              <button
+                // onClick={() => handleDeleteImage(img.id)}
+                className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            ))}
           </div>
 
           <div>

@@ -1,5 +1,6 @@
 package backend.com.eatease.service.serviceImpl;
 
+import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.dto.RestaurantDto;
 import backend.com.eatease.entity.*;
 import backend.com.eatease.exception.RestaurantNotFoundException;
@@ -7,6 +8,7 @@ import backend.com.eatease.repository.*;
 import backend.com.eatease.request.RestaurantRequest;
 import backend.com.eatease.request.UpdateTextBasedRestaurantRequest;
 import backend.com.eatease.response.ImageResponse;
+import backend.com.eatease.service.MenuService;
 import backend.com.eatease.service.RestaurantService;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -44,6 +46,9 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private ExtrasRepository extrasRepository;
+
+    @Autowired
+    private MenuService menuService;
 
     @Override
     @Transactional
@@ -151,12 +156,16 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Restaurant getRestaurantById(Long id) throws Exception {
+    public RestaurantDto viewRestaurantById(Long id) throws Exception {
 
-        return restaurantRepository.findById(id)
+        Restaurant restaurant= restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with id" +id));
+     return mapToDto(restaurant);
     }
-
+  public Restaurant getRestaurantById(Long id) throws RestaurantNotFoundException {
+      return restaurantRepository.findById(id)
+              .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with id" +id));
+  }
     @Override
     public List<RestaurantDto> getAllRestaurants() throws Exception {
         List<Restaurant> restaurants = restaurantRepository.findAll();
@@ -284,7 +293,12 @@ public class RestaurantServiceImpl implements RestaurantService {
             dto.setOwnerUsername(restaurant.getOwner().getUsername());
         }
 
-        dto.setFoods(restaurant.getFoods());
+        List<MenuDto> menuDtos = restaurant.getFoods()
+                .stream()
+                .map(menu -> menuService.toDto(menu))
+                .toList();
+        dto.setFoods(menuDtos);
+
         dto.setOrders(restaurant.getOrders());
 
         List<ImageResponse> imageResponses = restaurant.getImages().stream().map(image -> {

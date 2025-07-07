@@ -2,6 +2,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { CurrencyLira } from "@mui/icons-material";
 
 interface Image{
   id: number;
@@ -46,8 +47,8 @@ const MenuItemCard = ({ item, onEdit, onDelete }: MenuItemCardProps) => {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-lg">{item.foodName}</h3>
-                <p className="text-2xl font-bold text-orange-600">
-                  ${item.price.toFixed(2)}
+                <p className="text-2xl font-bold text-orange-600 flex items-center-safe">
+                  <CurrencyLira /> {item.price.toFixed(2)}
                 </p>
               </div>
               <div className="flex gap-2">

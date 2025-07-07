@@ -8,6 +8,7 @@ import backend.com.eatease.repository.ExtrasRepository;
 import backend.com.eatease.repository.ImageRepository;
 import backend.com.eatease.repository.MenuRepository;
 import backend.com.eatease.request.FoodRequest;
+import backend.com.eatease.request.UpdateTextBasedMenuItemRequest;
 import backend.com.eatease.response.ImageResponse;
 import backend.com.eatease.service.MenuService;
 import jakarta.persistence.EntityNotFoundException;
@@ -98,6 +99,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public void deleteFood(Long id) throws Exception {
        Menu menu = menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found with id "+id));
+       imageRepository.deleteByMenuId(id);
        menuRepository.deleteById(menu.getId());
     }
 
@@ -133,6 +135,32 @@ public class MenuServiceImpl implements MenuService {
         menu.setAvailable(!menu.isAvailable());
         return menuRepository.save(menu);
     }
+
+    @Override
+    @Transactional
+    public Menu updateTextBasedMenuItem(Long id, UpdateTextBasedMenuItemRequest req) {
+        Menu menu = menuRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Menu not found"));
+
+        menu.setFoodName(req.getFoodName());
+        menu.setDescription(req.getDescription());
+        menu.setPrice(req.getPrice());
+        menu.setAvailable(req.isAvailable());
+
+        if (req.getCategoryId() != null) {
+            Category category = categoryRepository.findById(req.getCategoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+            menu.setCategory(category);
+        }
+
+        if (req.getExtrasIds() != null) {
+            List<Extras> extras = extrasRepository.findAllById(req.getExtrasIds());
+            menu.setExtrasList(extras);
+        }
+
+        return menuRepository.save(menu);
+    }
+
 
     public MenuDto toDto(Menu menu) {
         List<ImageResponse> imageUrls = menu.getImagesList().stream()

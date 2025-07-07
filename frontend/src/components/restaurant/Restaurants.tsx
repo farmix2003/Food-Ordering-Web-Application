@@ -17,18 +17,34 @@ import {
   Alert,
   Container,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAllRestaurants } from "../../server/server";
 
-interface Restaurant {
-  id: string;
-  name: string;
-  image: string;
-  cuisine: string;
-  rating: number;
-  tags: string[];
-  description: string;
+interface Image {
+  id:number;
+  url:string;
 }
+interface Order {
+  id:number;
+  shippingAddress:{
+    apartment:string;
+    cityName:string;
+    streetName:string;
+  },
+  numberOfOrders:number;
+}
+interface Restaurant {
+  id:number;
+  contactInfo:{phone:string};
+  name:string;
+  open:boolean;
+  cuisineType:string;
+  images: Image[]
+  orders: Order[]
+  description:string;
+}
+
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -42,141 +58,49 @@ const Restaurants = () => {
   const [ratingFilter, setRatingFilter] = useState("");
   const navigate = useNavigate();
 
-  const mockRestaurants: Restaurant[] = [
-    {
-      id: "1",
-      name: "Bella Italia",
-      image:
-        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop",
-      cuisine: "Italian",
-      rating: 4.5,
-      tags: ["Italian", "Pizza", "Pasta", "Fine Dining"],
-      description: "Authentic Italian cuisine with fresh ingredients",
-    },
-    {
-      id: "2",
-      name: "Sakura Sushi",
-      image:
-        "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop",
-      cuisine: "Japanese",
-      rating: 4.8,
-      tags: ["Japanese", "Sushi", "Fresh Fish", "Traditional"],
-      description: "Fresh sushi and traditional Japanese dishes",
-    },
-    {
-      id: "3",
-      name: "Spice Garden",
-      image:
-        "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=300&fit=crop",
-      cuisine: "Indian",
-      rating: 4.3,
-      tags: ["Indian", "Spicy", "Vegetarian", "Curry"],
-      description: "Aromatic spices and authentic Indian flavors",
-    },
-    {
-      id: "4",
-      name: "Le Petit Bistro",
-      image:
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
-      cuisine: "French",
-      rating: 4.6,
-      tags: ["French", "Fine Dining", "Wine", "Romantic"],
-      description: "Classic French cuisine in an elegant setting",
-    },
-    {
-      id: "5",
-      name: "Taco Fiesta",
-      image:
-        "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop",
-      cuisine: "Mexican",
-      rating: 4.2,
-      tags: ["Mexican", "Tacos", "Spicy", "Casual"],
-      description: "Vibrant Mexican flavors and fresh ingredients",
-    },
-    {
-      id: "6",
-      name: "Dragon Palace",
-      image:
-        "https://images.unsplash.com/photo-1576458088443-04a19b4a37d6?w=400&h=300&fit=crop",
-      cuisine: "Chinese",
-      rating: 4.4,
-      tags: ["Chinese", "Dim Sum", "Noodles", "Traditional"],
-      description: "Traditional Chinese dishes with modern presentation",
-    },
-  ];
 
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        setLoading(true);
-        setTimeout(() => {
-          setRestaurants(mockRestaurants);
-          setFilteredRestaurants(mockRestaurants);
-          setLoading(false);
-        }, 1000);
-      } catch (err) {
-        setError("Failed to load restaurants" + err);
-        setLoading(false);
-      }
-    };
+  const getRestaurants = async() =>{
+    const data = await getAllRestaurants();
+   console.log(data);
+   setRestaurants(data)
+   setLoading(false)
+  }
+ useEffect(() =>{
+  getRestaurants()
+ },[])
 
-    fetchRestaurants();
-  }, []);
 
-  useEffect(() => {
+  useMemo(() => {
     let filtered = restaurants;
 
     if (searchTerm) {
       filtered = filtered.filter(
         (restaurant) =>
           restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          restaurant.cuisine.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          restaurant.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+          restaurant.cuisineType.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+  
 
     if (cuisineFilter && cuisineFilter !== "all") {
       filtered = filtered.filter(
-        (restaurant) => restaurant.cuisine === cuisineFilter
+        (restaurant) => restaurant.cuisineType === cuisineFilter
       );
     }
 
-    if (ratingFilter && ratingFilter !== "all") {
-      const minRating = parseFloat(ratingFilter);
-      filtered = filtered.filter(
-        (restaurant) => restaurant.rating >= minRating
-      );
-    }
 
     setFilteredRestaurants(filtered);
-  }, [searchTerm, cuisineFilter, ratingFilter, restaurants]);
+  }, [searchTerm, cuisineFilter, restaurants]);
 
-  const uniqueCuisines = [...new Set(restaurants.map((r) => r.cuisine))];
+  const uniqueCuisines = [...new Set(restaurants.map((r) => r.cuisineType))];
 
-  const handleViewMenu = (restaurantId: string) => {
+  const handleViewMenu = (restaurantId: number) => {
     navigate(`/restaurants/${restaurantId}`, {
-      state: { restaurant: mockRestaurants.find((r) => r.id === restaurantId) },
+      state: { restaurant: restaurants.find((r) => r.id === restaurantId) },
     });
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <Star
-        key={index}
-        sx={{
-          color:
-            index < Math.floor(rating)
-              ? "#FFD700"
-              : index < rating
-              ? "rgba(255,215,0,0.5)"
-              : "#e0e0e0",
-        }}
-        fontSize="small"
-      />
-    ));
-  };
+
 
   if (loading) {
     return (
@@ -306,7 +230,7 @@ const Restaurants = () => {
               >
                 <Box
                   component="img"
-                  src={restaurant.image}
+                  src={restaurant.images[0].url}
                   alt={restaurant.name}
                   sx={{
                     width: "100%",
@@ -319,14 +243,7 @@ const Restaurants = () => {
               </Box>
               <CardHeader
                 title={<Typography variant="h6">{restaurant.name}</Typography>}
-                subheader={
-                  <Box display="flex" alignItems="center" gap={1}>
-                    {renderStars(restaurant.rating)}
-                    <Typography variant="body2" color="text.secondary">
-                      {restaurant.rating} stars
-                    </Typography>
-                  </Box>
-                }
+               
                 sx={{ pb: 0 }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
@@ -334,14 +251,7 @@ const Restaurants = () => {
                   {restaurant.description}
                 </Typography>
                 <Box display="flex" flexWrap="wrap" gap={1}>
-                  {restaurant.tags.map((tag, index) => (
-                    <Chip
-                      key={index}
-                      label={tag}
-                      color="secondary"
-                      size="small"
-                    />
-                  ))}
+                  {restaurant.cuisineType}
                 </Box>
               </CardContent>
               <CardActions sx={{ mt: "auto", p: 2 }}>

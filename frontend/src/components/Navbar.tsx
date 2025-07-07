@@ -128,7 +128,9 @@ const Navbar = () => {
               fontWeight: "bold",
               color: "primary.main",
               mr: 4,
+              cursor:"pointer"
             }}
+            onClick={() =>navigate("/home")}
           >
             Eat Ease
           </Typography>

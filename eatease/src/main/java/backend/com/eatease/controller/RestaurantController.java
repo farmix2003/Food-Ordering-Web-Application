@@ -24,17 +24,15 @@ public class RestaurantController {
 
     @GetMapping("")
     public ResponseEntity<List<RestaurantDto>> getAllRestaurants() throws Exception {
-
         return new ResponseEntity<>(restaurantService.getAllRestaurants(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long id,
+    public ResponseEntity<RestaurantDto> getRestaurantById(@PathVariable Long id,
                                                         @RequestHeader("Authorization") String jwt
     ) throws Exception {
         User user = userService.findUserByJwtToken(jwt);
-        Restaurant restaurant = restaurantService.getRestaurantById(id);
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+        return new ResponseEntity<>(restaurantService.viewRestaurantById(id), HttpStatus.OK);
     }
 
     @GetMapping("/search")

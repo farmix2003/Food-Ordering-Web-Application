@@ -3,7 +3,46 @@ import OrderAgain from "../components/home/OrderAgain";
 import Carousel from "../components/home/TopFoodsCarousel";
 import TopRestaurantsGrid from "../components/home/TopRestaurantsCarousel";
 import "./../App.css";
+import { useEffect, useState } from "react";
+import { getAllRestaurants } from "../server/server";
+import { Button } from "../components/ui/button";
+import { useNavigate } from "react-router-dom";
+
+interface Image {
+  id:number;
+  url:string;
+}
+interface Order {
+  id:number;
+  shippingAddress:{
+    apartment:string;
+    cityName:string;
+    streetName:string;
+  },
+  numberOfOrders:number;
+}
+interface RestaurantProps {
+  id:number;
+  contactInfo:{phone:string};
+  name:string;
+  open:boolean;
+  cuisineType:string;
+  images: Image[]
+  orders: Order[]
+}
+
 const HomePage = () => {
+  const [restaurants, setRestaurants] = useState<RestaurantProps[]>([])
+  const navigate = useNavigate()
+  const getRestaurants = async() =>{
+    const data = await getAllRestaurants();
+   console.log(data);
+   setRestaurants(data)
+   
+  }
+ useEffect(() =>{
+  getRestaurants()
+ },[])
   return (
     <div className="min-h-screen bg-black/80 bg-img z-100">
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-6">
@@ -32,10 +71,12 @@ const HomePage = () => {
 
         {/* Top Restaurants Grid */}
         <div className="mb-12">
+
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Top Restaurants
           </h2>
-          <TopRestaurantsGrid />
+          <TopRestaurantsGrid restaurants={restaurants} />
+          <Button variant={"link"}onClick={() => navigate("/restaurants")} className="font-bold text-amber-700 text-2xl hover:text-amber-800" >Explore All</Button>
         </div>
 
         {/* Order Again Section */}

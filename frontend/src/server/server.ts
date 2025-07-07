@@ -387,6 +387,14 @@ const getExtrasByRestaurantId = async (restaurantId: number) => {
   });
   return response.data;
 }
+const getRestaurantById = async(id:number) =>{
+  const response = await axios.get(`/public/restaurants/${id}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return response.data
+}
 
 export {
   loginUser,
@@ -414,4 +422,5 @@ export {
   addExtrasToMenuItem,
   getMenuItemsByRestaurantId,
   getExtrasByRestaurantId,
+  getRestaurantById
 };

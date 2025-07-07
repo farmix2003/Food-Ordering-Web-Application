@@ -2,217 +2,91 @@ import {
   Add,
   FilterAlt,
   FmdGood,
+  Instagram,
+  LocationOn,
   LockClock,
   PlusOne,
   Star,
+  WhatsApp,
 } from "@mui/icons-material";
 import { Badge, Box, Button, Card, CardContent, Divider } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { getMenuItemsByRestaurantId, getRestaurantById } from "../../server/server";
+import { Phone } from "lucide-react";
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  category: string;
-  isVegetarian?: boolean;
-  isSpicy?: boolean;
+interface Image{
+  id: number;
+  url: string;
+  fileName: string;
 }
 
 interface Restaurant {
-  id: string;
+  id: number;
   name: string;
-  image: string;
-  rating: number;
+  images: Image[];
+  cuisineType: string;
   description: string;
-  cuisine: string[];
-  deliveryTime: string;
-  location: string;
+  address: {
+    streetName: string;
+    cityName: string;
+  };
+  contactInfo: {
+  email: string;
+  phone: string;
+  whatsApp: string;
+  instagram: string;
+  };
+  openingHours: string;
+  closingHours: string;
+  open: boolean;
+  foods:MenuItem[]
 }
 
-const mockRestaurant: Restaurant = {
-  id: "1",
-  name: "Bella Vista Italiana",
-  image:
-    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&h=600&fit=crop",
-  rating: 4.8,
-  description:
-    "Authentic Italian cuisine with a modern twist, featuring fresh ingredients and traditional recipes passed down through generations.",
-  cuisine: ["Italian", "Mediterranean", "Fine Dining"],
-  deliveryTime: "25-35 min",
-  location: "Downtown, 2.3 km away",
-};
+interface MenuItem {
+  id: string;
+  foodName: string;
+  price: number;
+  images: Image[];
+  description: string;
+  extrasList: { name: string; price: number }[];
+  available:boolean;
+  categoryName:string;
+  restaurantId:number;
 
-const mockMenuItems: MenuItem[] = [
-  {
-    id: "1",
-    name: "Margherita Pizza",
-    description:
-      "Fresh mozzarella, basil, and tomato sauce on our signature thin crust",
-    price: 18.99,
-    image:
-      "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop",
-    category: "Pizza",
-    isVegetarian: true,
-  },
-  {
-    id: "2",
-    name: "Truffle Risotto",
-    description:
-      "Creamy arborio rice with black truffle, parmesan, and wild mushrooms",
-    price: 28.99,
-    image:
-      "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&h=300&fit=crop",
-    category: "Main Course",
-    isVegetarian: true,
-  },
-  {
-    id: "3",
-    name: "Osso Buco",
-    description: "Slow-braised veal shank with saffron risotto and gremolata",
-    price: 32.99,
-    image:
-      "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop",
-    category: "Main Course",
-  },
-  {
-    id: "4",
-    name: "Burrata Caprese",
-    description:
-      "Fresh burrata cheese with heirloom tomatoes, basil oil, and balsamic reduction",
-    price: 16.99,
-    image:
-      "https://images.unsplash.com/photo-1608897013039-887f21d8c804?w=400&h=300&fit=crop",
-    category: "Appetizer",
-    isVegetarian: true,
-  },
-  {
-    id: "5",
-    name: "Tiramisu",
-    description: "Classic Italian dessert with mascarpone, coffee, and cocoa",
-    price: 9.99,
-    image:
-      "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=300&fit=crop",
-    category: "Dessert",
-    isVegetarian: true,
-  },
-  {
-    id: "6",
-    name: "Seafood Linguine",
-    description:
-      "Fresh linguine with mussels, clams, shrimp, and white wine sauce",
-    price: 26.99,
-    image:
-      "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=400&h=300&fit=crop",
-    category: "Pasta",
-  },
-  {
-    id: "7",
-    name: "Prosciutto Arancini",
-    description: "Crispy risotto balls stuffed with prosciutto and mozzarella",
-    price: 14.99,
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&h=300&fit=crop",
-    category: "Appetizer",
-  },
-  {
-    id: "8",
-    name: "Chianti Classico",
-    description:
-      "Full-bodied red wine from Tuscany, perfect with our meat dishes",
-    price: 12.99,
-    image:
-      "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=400&h=300&fit=crop",
-    category: "Drinks",
-  },
-];
+}
 
-const mockExtras: MenuItem[] = [
-  {
-    id: "e1",
-    name: "French Fries",
-    description: "Crispy golden fries with sea salt",
-    price: 4.99,
-    image:
-      "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&h=300&fit=crop",
-    category: "Sides",
-  },
-  {
-    id: "e2",
-    name: "Garlic Bread",
-    description: "Toasted bread with garlic butter and herbs",
-    price: 3.99,
-    image:
-      "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&h=300&fit=crop",
-    category: "Sides",
-  },
-  {
-    id: "e3",
-    name: "Cola",
-    description: "Refreshing cola drink, 330ml",
-    price: 2.99,
-    image:
-      "https://images.unsplash.com/photo-1581636625402-29b2a704ef13?w=400&h=300&fit=crop",
-    category: "Drinks",
-  },
-  {
-    id: "e4",
-    name: "Sparkling Water",
-    description: "San Pellegrino sparkling water, 500ml",
-    price: 3.49,
-    image:
-      "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=300&fit=crop",
-    category: "Drinks",
-  },
-  {
-    id: "e5",
-    name: "Side Salad",
-    description: "Fresh mixed greens with balsamic vinaigrette",
-    price: 5.99,
-    image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop",
-    category: "Sides",
-    isVegetarian: true,
-  },
-  {
-    id: "e6",
-    name: "Espresso",
-    description: "Rich Italian espresso coffee",
-    price: 2.49,
-    image:
-      "https://images.unsplash.com/photo-1510707577919-f5b40faa28f0?w=400&h=300&fit=crop",
-    category: "Drinks",
-  },
-];
+
 
 const RestaurantMenu = () => {
   const { id } = useParams();
   const location = useLocation();
   const restaurant1 = location.state?.restaurant;
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(restaurant1);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isLoading, setIsLoading] = useState(true);
   console.log(restaurant1);
+ 
+   const getAllMenuItems = async() =>{
+      const data = await getMenuItemsByRestaurantId(restaurant?.id||0)
+      setMenuItems(data)
+      console.log(data)
+    }
 
   const categories = [
     "All",
-    ...Array.from(new Set(mockMenuItems.map((item) => item.category))),
+    ...Array.from(new Set(menuItems.map((item) => item?.categoryName))),
   ];
 
   useEffect(() => {
     // Simulate API call
     const fetchData = async () => {
-      setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setRestaurant(mockRestaurant);
-      setMenuItems(mockMenuItems);
-      setFilteredItems(mockMenuItems);
+      
       setIsLoading(false);
     };
+    getAllMenuItems()
 
     fetchData();
   }, [id]);
@@ -222,7 +96,7 @@ const RestaurantMenu = () => {
       setFilteredItems(menuItems);
     } else {
       setFilteredItems(
-        menuItems.filter((item) => item.category === selectedCategory)
+        (menuItems ?? []).filter((item) => item.categoryName === selectedCategory)
       );
     }
   }, [selectedCategory, menuItems]);
@@ -274,8 +148,8 @@ const RestaurantMenu = () => {
       <div className="relative h-80 overflow-hidden">
         <Box
           component="img"
-          src={restaurant.image}
-          alt={restaurant.name}
+          src={restaurant.images[0].url}
+          alt={restaurant?.name}
           sx={{
             width: "100%",
             height: "100%",
@@ -287,32 +161,23 @@ const RestaurantMenu = () => {
         <div className="absolute inset-0 bg-black opacity-40" />
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-4xl font-bold mb-2">{restaurant1.name}</h1>
+            <h1 className="text-4xl font-bold mb-2">{restaurant.name}</h1>
             <div className="flex items-center gap-4 mb-3 flex-wrap">
               <div className="flex items-center gap-1">
-                {renderStars(restaurant1.rating)}
-                <span className="ml-1 font-semibold">{restaurant1.rating}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <LockClock className="w-4 h-4" />
-                <span className="text-sm">{restaurant.deliveryTime}</span>
+                <Phone className="w-4 h-4" />
+                <span className="text-sm">{restaurant.contactInfo.phone}</span>
+                <Instagram className="w-4 h-4" />
+                <span className="text-sm">{restaurant.contactInfo.instagram}</span>
+                <WhatsApp className="w-4 h-4" />
+                <span className="text-sm">{restaurant.contactInfo.whatsApp}</span>
               </div>
               <div className="flex items-center gap-1">
                 <FmdGood className="w-4 h-4" />
-                <span className="text-sm">{restaurant.location}</span>
+                <span className="text-sm">{restaurant.address.cityName + restaurant.address.streetName}</span>
               </div>
             </div>
             <p className="text-lg mb-3 max-w-2xl">{restaurant.description}</p>
-            <div className="flex gap-2">
-              {restaurant1.tags.map((type, index) => (
-                <Badge
-                  key={index}
-                  className="bg-gray-200/25 rounded-2xl px-1 text-white"
-                >
-                  {type}
-                </Badge>
-              ))}
-            </div>
+          
           </div>
         </div>
       </div>
@@ -328,9 +193,9 @@ const RestaurantMenu = () => {
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categories.map((category,i) => (
               <Button
-                key={category}
+                key={i}
                 variant={
                   selectedCategory === category ? "contained" : "outlined"
                 }
@@ -375,22 +240,18 @@ const RestaurantMenu = () => {
               }}
             >
               <div className="relative">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-3 right-3">
-                  {item.isVegetarian && (
-                    <Badge className="bg-green-500 hover:bg-green-600">
-                      Vegetarian
-                    </Badge>
-                  )}
-                </div>
+               {item.images?.map(img =>(
+                 <img
+                 src={img.url}
+                 alt={item.foodName}
+                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+               />
+               ))}
+                
               </div>
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {item.name}
+                  {item.foodName}
                 </h3>
                 <p className="text-gray-600 text-sm mb-3 line-clamp-3">
                   {item.description}
@@ -429,11 +290,11 @@ const RestaurantMenu = () => {
         )}
 
         {/* Extras Section */}
-        <div className="mt-16">
+        {/* <div className="mt-16">
           <Divider className="mb-8" sx={{ mb: 5 }} />
           <h2 className="text-3xl font-bold text-gray-800 mb-8">Extras</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockExtras.map((extra) => (
+            {menuItems.map((extra) => (
               <Card
                 key={extra.id}
                 className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
@@ -493,7 +354,7 @@ const RestaurantMenu = () => {
               </Card>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ public class RestaurantDto {
     private Long ownerId;
     private String ownerUsername;
 
-    private List<Menu> foods;
+    private List<MenuDto> foods;
     private List<Order> orders;
     private List<ImageResponse> images;
 }

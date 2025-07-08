@@ -19,5 +19,6 @@ public interface MenuService {
      Menu updateAvailableStatus(Long id) throws Exception;
      Menu updateTextBasedMenuItem(Long id, UpdateTextBasedMenuItemRequest request);
      MenuDto toDto(Menu menu);
+     List<MenuDto> getMenus();
 
 }

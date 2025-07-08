@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -13,65 +13,37 @@ import {
 } from "@mui/material";
 import { Restaurant } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { getRestaurantForlandingPage } from "../../server/server";
 
-const restaurants = [
-  {
-    id: 1,
-    name: "Italian Bistro",
-    cuisines: ["Italian", "Pizza", "Pasta"],
-    rating: 4.6,
-    image:
-      "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=400&h=250&fit=crop",
-    deliveryTime: "25-35 min",
-  },
-  {
-    id: 2,
-    name: "Sushi Palace",
-    cuisines: ["Japanese", "Sushi", "Asian"],
-    rating: 4.8,
-    image:
-      "https://images.unsplash.com/photo-1579027989054-b11a9b6d01f9?w=400&h=250&fit=crop",
-    deliveryTime: "30-40 min",
-  },
-  {
-    id: 3,
-    name: "Burger House",
-    cuisines: ["American", "Burgers", "Fast Food"],
-    rating: 4.4,
-    image:
-      "https://images.unsplash.com/photo-1552566588-bf594736da85?w=400&h=250&fit=crop",
-    deliveryTime: "20-30 min",
-  },
-  {
-    id: 4,
-    name: "Spice Garden",
-    cuisines: ["Indian", "Curry", "Spicy"],
-    rating: 4.5,
-    image:
-      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&h=250&fit=crop",
-    deliveryTime: "35-45 min",
-  },
-  {
-    id: 5,
-    name: "Green Salads",
-    cuisines: ["Healthy", "Salads", "Vegetarian"],
-    rating: 4.3,
-    image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop",
-    deliveryTime: "15-25 min",
-  },
-  {
-    id: 6,
-    name: "Dragon Wok",
-    cuisines: ["Chinese", "Asian", "Noodles"],
-    rating: 4.7,
-    image:
-      "https://images.unsplash.com/photo-1563379091339-03246efb27d7?w=400&h=250&fit=crop",
-    deliveryTime: "25-35 min",
-  },
-];
+interface Image{
+  id:number;
+  fileName:string;
+  url:string;
+}
+
+interface Restaurant {
+  id:number;
+  name:string;
+  images:Image[];
+  address:{streetName:string, cityName:string};
+  cuisineType:string
+}
 
 const TopRestaurants = () => {
+
+  const [restaurants, setRestuarants] = useState<Restaurant[]>([])
+
+
+    const getRestaurants = async() =>{
+      const data = await getRestaurantForlandingPage()
+      console.log(data)
+      setRestuarants(data)
+    }
+    useEffect(() =>{
+     getRestaurants() 
+    })
+
+
   return (
     <Box sx={{ py: 8, backgroundColor: "white" }}>
       <Container maxWidth="lg">
@@ -113,8 +85,14 @@ const TopRestaurants = () => {
                   <CardMedia
                     component="img"
                     height="200"
-                    image={restaurant.image}
+                    width={"25rem"}
+                    image={restaurant.images[0].url}
                     alt={restaurant.name}
+                    sx={{
+                      height:200,
+                      width:"25rem",
+                      objectFit:"cover"
+                    }}
                   />
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
@@ -122,14 +100,8 @@ const TopRestaurants = () => {
                     </Typography>
 
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Rating
-                        value={restaurant.rating}
-                        precision={0.1}
-                        size="small"
-                        readOnly
-                      />
                       <Typography variant="body2" sx={{ ml: 1 }}>
-                        {restaurant.rating} • {restaurant.deliveryTime}
+                        {restaurant.address.cityName} • {restaurant.address.streetName}
                       </Typography>
                     </Box>
 
@@ -141,14 +113,12 @@ const TopRestaurants = () => {
                         mb: 2,
                       }}
                     >
-                      {restaurant.cuisines.map((cuisine) => (
                         <Chip
-                          key={cuisine}
-                          label={cuisine}
+                          key={restaurant.cuisineType}
+                          label={restaurant.cuisineType}
                           size="small"
                           variant="outlined"
                         />
-                      ))}
                     </Box>
 
                     <Button

@@ -30,13 +30,13 @@ public class Menu {
     private Category category;
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value = "menu-images")
     private List<Image> imagesList = new ArrayList<>();
 
     private boolean isAvailable;
 
     @ManyToOne
-    @JsonBackReference
+    @JsonBackReference(value = "restaurant-menus")
     private Restaurant restaurant;
 
     @ManyToMany

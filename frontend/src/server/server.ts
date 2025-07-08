@@ -355,7 +355,7 @@ const addCategoryToRestaurant = async (restaurantId:number, categoryName:string)
       },
     }
   );
-  return response.data;
+  return response.data.id;
 }
 
 const getCategoriesByRestaurantId = async (restaurantId: number) => {
@@ -367,17 +367,18 @@ const getCategoriesByRestaurantId = async (restaurantId: number) => {
   return response.data;
 };
 
-const addExtrasToMenuItem = async (restaurantId:number, name:string,price:number) =>{
+const addExtrasToMenuItem = async (restaurantId:number, name:string,price:number):Promise<number> =>{
   const response = await axios.post(
     `/admin/extras/${restaurantId}/add`,
     { name, price },
     {
       headers: {
+        "Content-Type":'application/json',
         Authorization: `Bearer ${window.localStorage.getItem("token")}`,
       },
     }
   );
-  return response.data;
+  return response.data.id;
 }
 const getExtrasByRestaurantId = async (restaurantId: number) => {
   const response = await axios.get(`/admin/extras/${restaurantId}`, {
@@ -393,6 +394,16 @@ const getRestaurantById = async(id:number) =>{
       Authorization: `Bearer ${window.localStorage.getItem("token")}`
     }
   })
+  return response.data
+}
+
+const getRestaurantForlandingPage = async() =>{
+  const response = await axios.get('/all/restaurants')
+  return response.data;
+}
+
+const getMenusForLandingPage = async () =>{
+  const response = await axios.get('/all/menu')
   return response.data
 }
 
@@ -422,5 +433,7 @@ export {
   addExtrasToMenuItem,
   getMenuItemsByRestaurantId,
   getExtrasByRestaurantId,
-  getRestaurantById
+  getRestaurantById,
+  getRestaurantForlandingPage,
+  getMenusForLandingPage
 };

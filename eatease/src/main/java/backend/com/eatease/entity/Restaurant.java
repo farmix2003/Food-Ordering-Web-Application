@@ -47,15 +47,14 @@ public class Restaurant {
     private List<Order> orders = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value = "restaurant-images")
     private List<Image> images = new ArrayList<>();
 
     private boolean isOpen;
 
     private LocalDateTime registrationDate;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "restaurant-menus")
     private List<Menu> foods = new ArrayList<>();
 }

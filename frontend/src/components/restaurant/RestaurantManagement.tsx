@@ -273,6 +273,8 @@ const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
       );
       console.log("Adding new menu item");
       data.then(data => console.log(data))
+      getExtras()
+      getAllMenuItems()
       setIsModalOpen(false)
     }catch(e){
       console.log("Error: ",e)
@@ -312,14 +314,15 @@ const handleAddMenuItem = (item: Omit<NewMenuItem, "id">) => {
   }
 
 
-  const getExtras = () =>{
-    const data = getExtrasByRestaurantId(restaurant?.id || 0);
-    // console.log("Extras data fetched:", data);
-    data.then(data => setExtras(data))
+  const getExtras = async() =>{
+    const data = await getExtrasByRestaurantId(restaurant?.id || 0);
+    console.log("Extras data fetched:", data);
+   setExtras(data)
   }
   const getAllMenuItems = async() =>{
     const data = await getMenuItemsByRestaurantId(restaurant?.id||0)
     setMenuItems(data)
+    console.log(data)
   }
 
  const getCategories = async () => {

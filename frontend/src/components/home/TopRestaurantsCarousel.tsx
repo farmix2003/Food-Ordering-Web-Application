@@ -2,6 +2,7 @@
 import { Button, Card, CardContent } from "@mui/material";
 import { getAllRestaurants } from "../../server/server";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Image {
   id:number;
@@ -32,6 +33,8 @@ interface RestaurantProps{
 
 
 const TopRestaurantsGrid = ({restaurants}:RestaurantProps) => {
+
+  const navigate = useNavigate()
 
  
   return (
@@ -95,6 +98,7 @@ const TopRestaurantsGrid = ({restaurants}:RestaurantProps) => {
             color: "#fff",
             ":hover": { backgroundColor: "#ea580c" },
           }}
+          onClick={() =>navigate(`/restaurants/${restaurant.id}`, {state: { restaurant: restaurants.find((r) => r.id === restaurant.id)}})}
           disabled={!restaurant.open}
         >
           View Menu

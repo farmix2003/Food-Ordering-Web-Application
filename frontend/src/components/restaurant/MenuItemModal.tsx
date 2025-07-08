@@ -75,30 +75,34 @@ const MenuItemModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const validExtras = formData.extras.filter((e) => e.name && e.price);
     const newExtraIds: number[] = [];
-
+  
     for (const extra of validExtras) {
       const id = await onAddExtra(extra.name, extra.price);
-      newExtraIds.push(id);
+      newExtraIds.push(Number(id)); // ✅ Ensure number
     }
-
+  
     let categoryIdToUse = selectedCategoryId;
     if (!selectedCategoryId && newCategoryName.trim()) {
       categoryIdToUse = await onAddCategory(newCategoryName.trim());
     }
-
+    const allExtraIds: number[] = [...selectedExtrasIds, ...newExtraIds]
+      .filter((x): x is number => typeof x === "number")
+      .map(Number);
+  
     onSave({
       name: formData.name,
       price: formData.price,
       image: formData.image,
       description: formData.description,
-      extras:[],
-      extrasIds: [...selectedExtrasIds, ...newExtraIds],
+      extras: [],
+      extrasIds: allExtraIds,
       categoryId: categoryIdToUse,
     });
   };
+  
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -120,7 +124,7 @@ const MenuItemModal = ({
             <Label>Image</Label>
             <Input type="file" accept="image/*" onChange={(e) => setFormData((p) => ({ ...p, image: e.target.files?.[0] || null }))} />
             {formData.image && <p className="text-sm mt-1">{formData.image.name}</p>}
-            {existingImages.map((img)=>(
+            { editingItem && existingImages.map((img)=>(
               <div key={img.id} className="relative group mt-2">
               <img
                 src={img.url}
@@ -178,7 +182,7 @@ const MenuItemModal = ({
           <div>
             <Label>Attach Existing Extras</Label>
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {extras.map((extra) => (
+              {extras?.map((extra) => (
                 <label key={extra.id} className="flex gap-2 items-center">
                   <input
                     type="checkbox"
@@ -189,7 +193,7 @@ const MenuItemModal = ({
                       )
                     }
                   />
-                  {extra.name}
+                  {extra?.name}
                 </label>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -14,8 +14,25 @@ import {
 } from "@mui/material";
 import { AddShoppingCart } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { getMenusForLandingPage } from "../../server/server";
 
-const menuCategories = ["Breakfast", "Lunch", "Dinner", "Snacks", "Drinks"];
+interface Image {
+  id:number;
+  fileName:string;
+  url:string;
+}
+
+interface Menu {
+  id:number
+   categoryName:string;
+   description:string;
+   estrasList:{id:number, name:string; price:number};
+   foodName:string;
+   images:Image[]
+   price:number;
+}
+
+
 
 const menuItems = {
   Breakfast: [
@@ -122,17 +139,34 @@ const menuItems = {
 
 const MenuSection = () => {
   const [selectedCategory, setSelectedCategory] = useState(0);
-
-  const handleCategoryChange = (
+ const [menus, setMenus] = useState<Menu[]>([])
+ 
+ const getMenus = async() =>{
+  const data = await getMenusForLandingPage();
+  console.log(data)
+  setMenus(data)
+}
+ 
+useEffect(() =>{
+  getMenus()
+},[])
+console.log("Menus",menus)
+ 
+ const handleCategoryChange = (
     event: React.SyntheticEvent,
     newValue: number
   ) => {
     setSelectedCategory(newValue);
   };
 
-  const currentItems =
-    menuItems[menuCategories[selectedCategory] as keyof typeof menuItems] || [];
-
+  const uniqueCategories = Array.from(new Set(menus.map(menu => menu.categoryName)));
+  const menuCategories = ["All", ...uniqueCategories];
+  
+  const currentMenuItems: Menu[] =
+    menuCategories[selectedCategory] === "All"
+      ? menus.slice(0, 6)
+      : menus.filter(menu => menu.categoryName === menuCategories[selectedCategory]);
+  
   return (
     <Box sx={{ py: 8, backgroundColor: "background.default" }}>
       <Container maxWidth="lg">
@@ -165,15 +199,15 @@ const MenuSection = () => {
               },
             }}
           >
-            {menuCategories.map((category) => (
-              <Tab key={category} label={category} />
+            {menuCategories.map((category,index) => (
+              <Tab key={index} label={category} />
             ))}
           </Tabs>
         </Box>
 
         <Grid container spacing={4}>
-          {currentItems.map((item, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+          {currentMenuItems?.map((item, index) => (
+            <Grid key={item.id}>
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -191,14 +225,19 @@ const MenuSection = () => {
                   }}
                 >
                   <CardMedia
-                    component="img"
-                    height="200"
-                    image={item.image}
-                    alt={item.name}
-                  />
+  component="img"
+  image={item.images[0].url}
+  alt={item.images[0].fileName}
+  sx={{
+    height: 200,
+    width: "20rem",
+    objectFit: "cover",
+  }}
+/>
+
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
-                      {item.name}
+                      {item.foodName}
                     </Typography>
 
                     <Typography
@@ -208,18 +247,6 @@ const MenuSection = () => {
                     >
                       {item.description}
                     </Typography>
-
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Rating
-                        value={item.rating}
-                        precision={0.1}
-                        size="small"
-                        readOnly
-                      />
-                      <Typography variant="body2" sx={{ ml: 1 }}>
-                        ({item.rating})
-                      </Typography>
-                    </Box>
 
                     <Box
                       sx={{

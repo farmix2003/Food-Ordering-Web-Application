@@ -31,6 +31,7 @@ public class SecurityConfig {
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize ->
                         authorize
+                                .requestMatchers("/api/all/**").permitAll()
                                 .requestMatchers("/api/public/images/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "RESTAURANT_OWNER")
                                 .requestMatchers("/api/public/**").authenticated().anyRequest().permitAll()

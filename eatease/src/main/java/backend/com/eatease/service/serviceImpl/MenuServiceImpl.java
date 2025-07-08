@@ -190,5 +190,12 @@ public class MenuServiceImpl implements MenuService {
                 );
     }
 
+    @Override
+    public List<MenuDto> getMenus() {
+        List<Menu> menus = menuRepository.findAll();
+        return menus.stream()
+                .map(this::toDto)
+                .toList();
+    }
 
 }

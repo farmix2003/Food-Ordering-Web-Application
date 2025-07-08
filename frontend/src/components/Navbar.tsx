@@ -126,7 +126,7 @@ const Navbar = () => {
             sx={{
               flexGrow: isMobile ? 1 : 0,
               fontWeight: "bold",
-              color: "primary.main",
+              color: "#FF6B35",
               mr: 4,
               cursor:"pointer"
             }}
@@ -149,7 +149,7 @@ const Navbar = () => {
                       variant="contained"
                       size="small"
                       onClick={() => navigate("/admin/dashboard")}
-                      sx={{ mr: 2 }}
+                      sx={{ mr: 2, backgroundColor:"#FF6B35" }}
                     >
                       Admin Panel
                     </Button>
@@ -158,7 +158,7 @@ const Navbar = () => {
                       variant="contained"
                       size="small"
                       onClick={() => navigate("/restaurant/dashboard")}
-                      sx={{ mr: 2 }}
+                      sx={{ mr: 2, backgroundColor:"#FF6B35" }}
                     >
                       Restaurant Owner Panel
                     </Button>
@@ -199,6 +199,7 @@ const Navbar = () => {
                       variant="outlined"
                       size="small"
                       onClick={() => navigate("/login")}
+                      sx={{color:"#FF6B35"}}
                     >
                       Login
                     </Button>
@@ -206,6 +207,7 @@ const Navbar = () => {
                       variant="contained"
                       size="small"
                       onClick={() => navigate("/register")}
+                      sx={{backgroundColor:"#FF6B35", borderColor:"#FF6B35"}}
                     >
                       Sign Up
                     </Button>

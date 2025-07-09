@@ -13,9 +13,9 @@ import {
   CardContent,
   Divider,
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { getMenuItemsByRestaurantId } from "../../server/server";
+import { useState, useEffect, use } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { addItemToCart, getMenuItemsByRestaurantId, getUserByJwt } from "../../server/server";
 import { Phone } from "lucide-react";
 
 interface Image {
@@ -30,7 +30,7 @@ interface MenuItem {
   price: number;
   images: Image[];
   description: string;
-  extrasList: { name: string; price: number }[];
+  extrasList: {id:number; name: string; price: number }[];
   available: boolean;
   categoryName: string;
   restaurantId: number;
@@ -58,6 +58,10 @@ interface Restaurant {
   foods: MenuItem[];
 }
 
+interface User{
+  id:number
+}
+
 const RestaurantMenu = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -68,7 +72,8 @@ const RestaurantMenu = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedExtrasMap, setSelectedExtrasMap] = useState<{ [key: string]: { name: string; price: number }[] }>({});
-
+  const [user, setUser] = useState<User|null>(null)
+  const navigate = useNavigate()
   useEffect(() => {
     const getAllMenuItems = async () => {
       if (restaurant?.id) {
@@ -93,13 +98,21 @@ const RestaurantMenu = () => {
       const selected = prev[itemId] || [];
       const exists = selected.find((e) => e.name === extra.name);
       return {
-        ...prev,
+        ...prev,  
         [itemId]: exists
           ? selected.filter((e) => e.name !== extra.name)
           : [...selected, extra],
       };
     });
   };
+
+  useEffect(() =>{
+    const getUser = async()=>{
+      const data = await getUserByJwt();
+      setUser(data)
+    }
+    getUser()
+  })
 
   if (isLoading) {
     return (
@@ -122,6 +135,7 @@ const RestaurantMenu = () => {
       </div>
     );
   }
+
 
   const categories = [
     "All",
@@ -229,7 +243,28 @@ const RestaurantMenu = () => {
                   </span>
                   <Button
                     size="small"
-                    onClick={() => console.log("Add to Cart:", item, selectedExtrasMap[item.id] || [])}
+                    onClick={async () => {
+                      const extras = selectedExtrasMap[item.id] || [];
+                      
+                      try {
+                        await addItemToCart({
+                          foodId: Number(item.id),
+                          quantity: 1,
+                          extrasIds: extras.map((e) => {
+                            const match = item.extrasList.find((x) => x.name === e.name);
+                            return match ? match.id : 0; 
+                          }).filter((id) => id !== 0)
+                        });
+                        if (user) {
+                          navigate(`/user/cart/${user.id}`);
+                        }
+                        alert("Item added to cart!");
+                      } catch (err) {
+                        alert("Failed to add item to cart.");
+                        console.error(err);
+                      }
+                    }}
+                    
                     className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
                     sx={{
                       borderRadius: "1rem",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2, MapPin, Store, Edit } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
@@ -9,79 +9,126 @@ import {
 } from "../components/ui/card";
 import { Separator } from "../components/ui/seperator";
 import AddressModal from "../components/AddressModal";
+import {
+  addUserAddress,
+  clearCart,
+  deleteCartItem,
+  editUserAddress,
+  getCartByUserId,
+  getUserByJwt,
+  removeAddress,
+  updateCartItem,
+} from "../server/server";
+import { useNavigate, useParams } from "react-router-dom";
+import { Box } from "@mui/material";
+import { CurrencyLira } from "@mui/icons-material";
+import { toast } from "sonner";
+
+interface Image {
+  id: number;
+  fileName: string;
+  url: string;
+}
+
+interface Extra {
+  id: number;
+  name: string;
+  price: string;
+}
 
 interface CartItem {
-  id: string;
-  name: string;
-  price: number;
+  id: number;
+  foodName: string;
+  pricePerUnit: number;
   quantity: number;
-  image?: string;
+  image?: Image;
+  totalPrice: number;
+  extras: Extra[];
+}
+
+interface CartProps {
+  id: number;
+  items: CartItem[];
+  total: number;
 }
 
 interface Address {
-  id: string;
-  title: string;
-  fullAddress: string;
-  isDefault?: boolean;
+  id: number;
+  streetName: string;
+  apartment: string;
+  cityName: string;
 }
 
-const mockCartItems: CartItem[] = [
-  {
-    id: "1",
-    name: "Margherita Pizza",
-    price: 14.99,
-    quantity: 2,
-  },
-  {
-    id: "2",
-    name: "Caesar Salad",
-    price: 8.99,
-    quantity: 1,
-  },
-  {
-    id: "3",
-    name: "Chicken Alfredo",
-    price: 16.99,
-    quantity: 1,
-  },
-];
+interface User {
+  id: number;
+  addressList: Address[];
+}
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(mockCartItems);
-  const [deliveryAddress, setDeliveryAddress] = useState(
-    "123 Main Street, Apt 4B, New York, NY 10001"
-  );
+  const [cartItems, setCartItems] = useState<CartProps>();
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const restaurantName = "Mario's Italian Kitchen";
+  const [address, setAddress] = useState<User>();
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItem(id);
-      return;
+  const getUserAddress = async () => {
+    const data = await getUserByJwt();
+    setAddress(data);
+    if (data?.addressList?.length > 0) {
+      const defaultAddress = data.addressList[0];
+      setDeliveryAddress(
+        `${defaultAddress.apartment}, ${defaultAddress.streetName}, ${defaultAddress.cityName}`
+      );
     }
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
   };
 
-  const removeItem = (id: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  useEffect(() => {
+    const getUserCart = async () => {
+      if (id) {
+        const data = await getCartByUserId(Number.parseInt(id));
+        setCartItems(data);
+      }
+    };
+    getUserCart();
+    getUserAddress();
+  }, [id]);
+
+  const updateCartItemQuantity = async (itemId: number, quantity: number) => {
+    if (quantity < 1) return;
+    await updateCartItem(itemId, quantity);
+    if (id) {
+      const data = await getCartByUserId(Number.parseInt(id));
+      setCartItems(data);
+    }
   };
 
-  const handleAddressChange = (address: Address) => {
-    setDeliveryAddress(address.fullAddress);
+  const handleDeleteCartItem = async (itemId: number) => {
+    await deleteCartItem(itemId);
+    toast.success("Item deleted successfully");
+    if (id) {
+      const data = await getCartByUserId(Number.parseInt(id));
+      setCartItems(data);
+    }
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const deliveryFee = cartItems.length > 0 ? 2.99 : 0;
-  const total = subtotal + deliveryFee;
+  const handleClearCart = async () => {
+    if (!cartItems || cartItems.items.length === 0) return;
+    try {
+      if (id) {
+        await clearCart(Number.parseInt(id));
+      }
+      toast.success("Cart cleared successfully");
+      if (id) {
+        const data = await getCartByUserId(Number.parseInt(id));
+        setCartItems(data);
+      }
+    } catch {
+      toast.error("Failed to clear cart");
+    }
+  };
 
-  if (cartItems.length === 0) {
+  if (!cartItems || cartItems.items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 overflow-scroll">
         <div className="max-w-4xl mx-auto px-4">
@@ -95,7 +142,10 @@ const Cart = () => {
             <p className="text-gray-600 mb-8">
               Add some delicious items to get started!
             </p>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg">
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
+              onClick={() => navigate("/restaurants")}
+            >
               Browse Menu
             </Button>
           </div>
@@ -107,13 +157,8 @@ const Cart = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Cart</h1>
-          <div className="flex items-center text-gray-600 mb-2">
-            <Store className="w-5 h-5 mr-2" />
-            <span className="font-medium">{restaurantName}</span>
-          </div>
           <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
             <div className="flex items-center text-gray-600">
               <MapPin className="w-5 h-5 mr-2" />
@@ -132,132 +177,127 @@ const Cart = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">
-                  Order Items
-                </CardTitle>
+              <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between">
+                <CardTitle className="text-xl font-semibold">Order Items</CardTitle>
+                <Button
+                  variant={"destructive"}
+                  size="sm"
+                  className="bg-red-500 text-white hover:bg-red-600 text-2xl"
+                  onClick={handleClearCart}
+                >
+                  Clear Cart
+                </Button>
               </CardHeader>
+
               <CardContent className="space-y-4">
-                {cartItems.map((item, index) => (
+                {cartItems.items.map((item, index) => (
                   <div key={item.id}>
                     <div className="flex items-center space-x-4 py-4">
-                      {/* Item Image Placeholder */}
-                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0"></div>
-
-                      {/* Item Details */}
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0">
+                        <Box
+                          component="img"
+                          src={item.image?.url}
+                          alt={item.foodName}
+                          width="100%"
+                          height="100%"
+                          sx={{ objectFit: "cover", borderRadius: "4px" }}
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 truncate">
-                          {item.name}
+                          {item.foodName}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          ${item.price.toFixed(2)} each
+                          <CurrencyLira /> {item.totalPrice.toFixed(2)} each
                         </p>
                       </div>
-
-                      {/* Quantity Controls */}
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
+                          onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
                           className="h-8 w-8 p-0 rounded-full"
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-medium">
-                          {item.quantity}
-                        </span>
+                        <span className="w-8 text-center font-medium">{item.quantity}</span>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
+                          onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
                           className="h-8 w-8 p-0 rounded-full"
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
-
-                      {/* Item Total */}
                       <div className="text-right">
                         <p className="font-medium text-gray-900">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          <CurrencyLira /> {(item.pricePerUnit * item.quantity).toFixed(2)}
                         </p>
                       </div>
-
-                      {/* Remove Button */}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleDeleteCartItem(item.id)}
                         className="h-8 w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    {index < cartItems.length - 1 && <Separator />}
+                    {index < cartItems.items.length - 1 && <Separator />}
                   </div>
                 ))}
               </CardContent>
             </Card>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="sticky top-8">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">
-                  Order Summary
-                </CardTitle>
+                <CardTitle className="text-xl font-semibold">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">
-                    Subtotal ({cartItems.length} items)
+                    Subtotal ({cartItems.items.length} items)
                   </span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
                 </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Delivery Fee</span>
-                  <span className="font-medium">${deliveryFee.toFixed(2)}</span>
-                </div>
-
                 <Separator />
-
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>
+                    <CurrencyLira /> {cartItems.total.toFixed(2)}
+                  </span>
                 </div>
-
-                <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium rounded-lg mt-6"
-                  size="lg"
-                >
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium rounded-lg mt-6">
                   Place Order
                 </Button>
-
                 <p className="text-xs text-gray-500 text-center mt-4">
-                  By placing your order, you agree to our Terms of Service and
-                  Privacy Policy.
+                  By placing your order, you agree to our Terms of Service and Privacy Policy.
                 </p>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Address Modal */}
         <AddressModal
           isOpen={showAddressModal}
           onClose={() => setShowAddressModal(false)}
-          onSelectAddress={handleAddressChange}
           currentAddress={deliveryAddress}
+          addressList={address?.addressList ?? []}
+          onAddAddress={(input) =>
+            addUserAddress(input.streetName, input.apartment, input.cityName).then(() => getUserAddress())
+          }
+          onEditAddress={(id, input) =>
+            editUserAddress(id, input.streetName, input.apartment, input.cityName).then(() => getUserAddress())
+          }
+          onDeleteAddress={(id) => removeAddress(id).then(() => getUserAddress())}
+          onSelectAddress={(addr) => {
+            setDeliveryAddress(`${addr.apartment}, ${addr.streetName}, ${addr.cityName}`);
+            setShowAddressModal(false);
+          }}
         />
       </div>
     </div>

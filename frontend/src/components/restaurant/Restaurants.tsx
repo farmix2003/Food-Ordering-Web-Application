@@ -225,52 +225,62 @@ const Restaurants = () => {
                 "&:hover": { boxShadow: 6 },
               }}
             >
-              <Box
-                sx={{ aspectRatio: "16/9", overflow: "hidden", width: "100%" }}
-              >
-                <Box
-                  component="img"
-                  src={restaurant.images[0].url}
-                  alt={restaurant.name}
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 0.3s",
-                    "&:hover": { transform: "scale(1.05)" },
-                  }}
-                />
-              </Box>
-              <CardHeader
-                title={<Typography variant="h6">{restaurant.name}</Typography>}
-               
-                sx={{ pb: 0 }}
-              />
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  {restaurant.description}
-                </Typography>
-                <Box display="flex" flexWrap="wrap" gap={1}>
-                  {restaurant.cuisineType}
-                </Box>
-              </CardContent>
-              <CardActions sx={{ mt: "auto", p: 2 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{
-                    background: "linear-gradient(to right, #ef4444, #14b8a6)",
-                    color: "#fff",
-                    fontWeight: "bold",
-                    "&:hover": {
-                      background: "linear-gradient(to right, #dc2626, #0d9488)",
-                    },
-                  }}
-                  onClick={() => handleViewMenu(restaurant.id)}
-                >
-                  View Menu
-                </Button>
-              </CardActions>
+               <Box sx={{ aspectRatio: "16/9", overflow: "hidden", width: "100%" }}>
+    <Box
+      component="img"
+      src={restaurant.images[0].url}
+      alt={restaurant.name}
+      sx={{
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        filter: restaurant.open ? "none" : "grayscale(100%)",
+        opacity: restaurant.open ? 1 : 0.6,
+        transition: "transform 0.3s",
+        "&:hover": { transform: "scale(1.05)" },
+      }}
+    />
+  </Box>
+  <CardHeader
+    title={
+      <Typography variant="h6" color={restaurant.open ? "initial" : "text.disabled"}>
+        {restaurant.name} {!restaurant.open && "(Closed)"}
+      </Typography>
+    }
+    sx={{ pb: 0 }}
+  />
+  <CardContent sx={{ flexGrow: 1 }}>
+    <Typography variant="body2" color="text.secondary" mb={2}>
+      {restaurant.description}
+    </Typography>
+    <Box display="flex" flexWrap="wrap" gap={1}>
+      {restaurant.cuisineType}
+    </Box>
+  </CardContent>
+  <CardActions sx={{ mt: "auto", p: 2 }}>
+    <Button
+      fullWidth
+      variant="contained"
+      disabled={!restaurant.open}
+      sx={{
+        background: restaurant.open
+          ? "linear-gradient(to right, #ef4444, #14b8a6)"
+          : "gray",
+        color: "#fff",
+        fontWeight: "bold",
+        "&:hover": {
+          background: restaurant.open
+            ? "linear-gradient(to right, #dc2626, #0d9488)"
+            : "gray",
+        },
+      }}
+      onClick={() => {
+        if (restaurant.open) handleViewMenu(restaurant.id);
+      }}
+    >
+      {restaurant.open ? "View Menu" : "Closed"}
+    </Button>
+  </CardActions>
             </Card>
           </Grid>
         ))}

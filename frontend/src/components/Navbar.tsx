@@ -36,6 +36,7 @@ import { LogOutIcon } from "lucide-react";
 import { getUserByJwt, logoutUser } from "../server/server";
 // import {i18n} from "i18next";
 type User = {
+  id:number
   username: string;
   role: string;
 };
@@ -185,7 +186,7 @@ const Navbar = () => {
                 {/* Cart Icon */}
                 <IconButton
                   sx={{ mr: 2 }}
-                  onClick={() => navigate("/user/cart")}
+                  onClick={() => navigate(`/user/cart/${user?.id}`)}
                 >
                   <Badge badgeContent={3} color="primary">
                     <ShoppingCart />

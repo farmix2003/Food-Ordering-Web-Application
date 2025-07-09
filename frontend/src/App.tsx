@@ -74,7 +74,7 @@ const App = () => {
               element={<PrivateRoute element={<UserProfile />} />}
             />
             <Route
-              path="/user/cart"
+              path="/user/cart/:id"
               element={<PrivateRoute element={<Cart />} />}
             />
             <Route

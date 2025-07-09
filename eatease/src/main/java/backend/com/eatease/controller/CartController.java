@@ -3,6 +3,7 @@ package backend.com.eatease.controller;
 import backend.com.eatease.entity.Cart;
 import backend.com.eatease.entity.CartItem;
 import backend.com.eatease.request.CartItemReq;
+import backend.com.eatease.response.CartResponse;
 import backend.com.eatease.response.MessageResponse;
 import backend.com.eatease.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +47,11 @@ public class CartController {
     }
 
     @GetMapping("/public/user-cart/{id}")
-    public ResponseEntity<Cart> getUserCart(@PathVariable Long id,
-                                            @RequestHeader("Authorization") String jwt
+    public ResponseEntity<CartResponse> getUserCart(@PathVariable Long id,
+                                                    @RequestHeader("Authorization") String jwt
                                             ) throws Exception {
-        Cart userCart = cartService.findCartByUserId(id);
-        return ResponseEntity.ok(userCart);
+        CartResponse cartResponse = cartService.getCartResponseByUserId(id);
+        return ResponseEntity.ok(cartResponse);
     }
 
     @DeleteMapping("/public/clear/{id}")

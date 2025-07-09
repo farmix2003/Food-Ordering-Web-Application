@@ -406,6 +406,55 @@ const getMenusForLandingPage = async () =>{
   const response = await axios.get('/all/menu')
   return response.data
 }
+const addItemToCart = async(itemData:{foodId:number, quantity:number, extrasIds:number[]}) =>{
+ 
+  
+
+  const response = await axios.post('/public/add',itemData,
+{
+    headers:{
+      Authorization:  `Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return response.data
+}
+
+const getCartByUserId = async (id:number) =>{
+  const response = await axios.get(`/public/user-cart/${id}`, {
+    headers:{
+      Authorization:`Bearer ${window.localStorage.getItem("token")}`
+    }
+  });
+  console.log("data accepted: ",response.data)
+  return response.data;
+}
+
+const updateCartItem = async(itemId:number, quantity:number) =>{
+  const data = await axios.put(`/public/update/${itemId}?quantity=${quantity}`,null,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return data.data
+}
+const deleteCartItem = async(id:number) =>{
+  const response = await axios.delete(`/public/delete/${id}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
+const  clearCart = async(id:number) =>{
+  const response = await axios.delete(`/public/clear/${id}`,{
+    headers:{
+      Authorization:`Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
 
 export {
   loginUser,
@@ -435,5 +484,10 @@ export {
   getExtrasByRestaurantId,
   getRestaurantById,
   getRestaurantForlandingPage,
-  getMenusForLandingPage
+  getMenusForLandingPage,
+  addItemToCart,
+  getCartByUserId,
+  updateCartItem,
+  deleteCartItem,
+  clearCart
 };

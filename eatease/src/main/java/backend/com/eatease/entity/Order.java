@@ -1,5 +1,7 @@
 package backend.com.eatease.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,9 +33,11 @@ public class Order {
     private Date createdAt;
 
     @ManyToOne
+    @JsonBackReference("restaurant-orders")
     private Address shippingAddress;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<OrderedFood> orderedFoodList = new ArrayList<>();
 
     private int totalOfOrder;

@@ -13,5 +13,6 @@ public class CartItemResponse {
     private int quantity;
     private double pricePerUnit;
     private double totalPrice;
+    private Long restaurantId;
     private List<ExtrasDto> extras;
 }

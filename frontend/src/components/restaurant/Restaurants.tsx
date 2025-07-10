@@ -228,7 +228,7 @@ const Restaurants = () => {
                <Box sx={{ aspectRatio: "16/9", overflow: "hidden", width: "100%" }}>
     <Box
       component="img"
-      src={restaurant.images[0].url}
+      src={restaurant?.images[0].url}
       alt={restaurant.name}
       sx={{
         width: "100%",

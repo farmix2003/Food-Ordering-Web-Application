@@ -399,6 +399,7 @@ const getRestaurantById = async(id:number) =>{
 
 const getRestaurantForlandingPage = async() =>{
   const response = await axios.get('/all/restaurants')
+  console.log(response.data)
   return response.data;
 }
 
@@ -454,7 +455,34 @@ const  clearCart = async(id:number) =>{
   })
   return response.data
 }
+const createOrder = async(addressId:number) =>{
 
+  
+  const response = await axios.post('/public/order', {addressId}, {
+    headers:{
+      Authorization:`Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return response.data;
+  
+}
+
+const getUserOrders = async(id:number) =>{
+  const response = await axios.get(`/public/user/${id}/order`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return response.data;
+}
+const cancelOrder = async(id:number) =>{
+  const response = await axios.put(`/public/cancel/${id}`,{},{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
 
 export {
   loginUser,
@@ -489,5 +517,8 @@ export {
   getCartByUserId,
   updateCartItem,
   deleteCartItem,
-  clearCart
+  clearCart,
+  createOrder,
+  getUserOrders,
+  cancelOrder
 };

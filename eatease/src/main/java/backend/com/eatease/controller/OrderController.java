@@ -1,5 +1,6 @@
 package backend.com.eatease.controller;
 
+import backend.com.eatease.dto.OrderDto;
 import backend.com.eatease.entity.Order;
 import backend.com.eatease.entity.User;
 import backend.com.eatease.exception.CartItemNotFoundException;
@@ -26,7 +27,7 @@ public class OrderController {
 
     @PostMapping("/order")
     public ResponseEntity<Order> orderFood(@RequestHeader("Authorization")String jwt,
-                                           @RequestBody OrderRequest request
+                                              @RequestBody OrderRequest request
                                            ) throws Exception, CartItemNotFoundException {
         User user = userService.findUserByJwtToken(jwt);
         Order order = orderService.createOrder(request, user);
@@ -44,10 +45,10 @@ public class OrderController {
     }
 
     @GetMapping("/user/{id}/order")
-    public ResponseEntity<List<Order>> getUserOrders(@RequestHeader("Authorization")String jwt,
+    public ResponseEntity<List<OrderDto>> getUserOrders(@RequestHeader("Authorization")String jwt,
                                                      @PathVariable Long id
                                                      ) throws Exception {
-        List<Order> orders = orderService.getOrdersByUserId(id);
+        List<OrderDto> orders = orderService.getOrdersByUserId(id);
         return ResponseEntity.ok(orders);
     }
     @GetMapping("/order/id")

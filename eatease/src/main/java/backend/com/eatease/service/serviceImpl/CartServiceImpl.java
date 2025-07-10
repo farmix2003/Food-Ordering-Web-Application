@@ -137,7 +137,6 @@ public class CartServiceImpl implements CartService {
         CartResponse cartResponse = new CartResponse();
         cartResponse.setCartId(cart.getId());
         cartResponse.setTotal(cart.getTotal());
-
         List<CartItemResponse> itemResponses = cart.getCartItems().stream()
                 .map(item -> {
                     CartItemResponse res = new CartItemResponse();
@@ -146,7 +145,7 @@ public class CartServiceImpl implements CartService {
                     res.setQuantity(item.getQuantity());
                     res.setPricePerUnit(item.getFood().getPrice());
                     res.setTotalPrice(item.getTotalPrice());
-
+                    res.setRestaurantId(item.getFood().getRestaurant().getId());
                     if (!item.getFood().getImagesList().isEmpty()) {
                        List<ImageResponse> imageResponses =  item.getFood().getImagesList().stream()
                                 .map(file ->{

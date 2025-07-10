@@ -12,6 +12,7 @@ import AddressModal from "../components/AddressModal";
 import {
   addUserAddress,
   clearCart,
+  createOrder,
   deleteCartItem,
   editUserAddress,
   getCartByUserId,
@@ -44,6 +45,7 @@ interface CartItem {
   image?: Image;
   totalPrice: number;
   extras: Extra[];
+  restaurantId:number
 }
 
 interface CartProps {
@@ -127,6 +129,34 @@ const Cart = () => {
       toast.error("Failed to clear cart");
     }
   };
+
+  const handleCreateOrder = async () => {
+    if (!address) {
+      toast.error("User data not loaded yet");
+      return;
+    }
+  
+    const selectedAddress = address.addressList.find(addr =>
+      `${addr.apartment}, ${addr.streetName}, ${addr.cityName}` === deliveryAddress
+    );
+  
+    if (!selectedAddress) {
+      toast.error("Please select a valid address");
+      return;
+    }
+  
+    try {
+      const data = await createOrder(selectedAddress.id);
+      toast.success("Order created successfully");
+      console.log("Order response:", data);
+      handleClearCart()
+      navigate(`/user/orders/${address.id}`)
+    } catch (error) {
+      toast.error("Failed to create order");
+      console.error(error);
+    }
+  };
+  
 
   if (!cartItems || cartItems.items.length === 0) {
     return (
@@ -271,7 +301,9 @@ const Cart = () => {
                     <CurrencyLira /> {cartItems.total.toFixed(2)}
                   </span>
                 </div>
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium rounded-lg mt-6">
+                <Button
+                onClick={handleCreateOrder}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium rounded-lg mt-6">
                   Place Order
                 </Button>
                 <p className="text-xs text-gray-500 text-center mt-4">

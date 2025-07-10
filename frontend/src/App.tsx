@@ -21,6 +21,7 @@ import Footer from "./components/Footer";
 import { useEffect } from "react";
 import { checkTokenExpiry } from "./server/server";
 import RestaurantSidebar from "./components/restaurant/RestaurantSidebar";
+import Orders from "./components/user/Orders";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => {
               path="/user/cart/:id"
               element={<PrivateRoute element={<Cart />} />}
             />
+            <Route path="/user/orders/:id" element={<PrivateRoute element={<Orders />} />} />
             <Route
               path="/admin/dashboard"
               element={<PrivateRoute element={<AdminDashboard />} />}

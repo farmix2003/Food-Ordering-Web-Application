@@ -1,8 +1,14 @@
 package backend.com.eatease.service.serviceImpl;
 
+import backend.com.eatease.dto.ExtrasDto;
+import backend.com.eatease.dto.OrderDto;
 import backend.com.eatease.entity.*;
 import backend.com.eatease.repository.*;
 import backend.com.eatease.request.OrderRequest;
+import backend.com.eatease.response.FoodResponse;
+import backend.com.eatease.response.ImageResponse;
+import backend.com.eatease.response.OrderedFoodResponse;
+import backend.com.eatease.response.RestaurantSimpleResponse;
 import backend.com.eatease.service.CartService;
 import backend.com.eatease.service.OrderService;
 import backend.com.eatease.service.RestaurantService;
@@ -14,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -41,24 +48,33 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order createOrder(OrderRequest order, User user) throws Exception {
-
-        if (order == null || order.getShippingAddress() == null) {
-            throw new IllegalArgumentException("Order request and shipping address must not be null");
-        }
-
-        Address shippingAddress = addressRepository.save(order.getShippingAddress());
-        if (!user.getAddressList().contains(shippingAddress)) {
-            user.getAddressList().add(shippingAddress);
-            userRepository.save(user);
-        }
-
-        Restaurant restaurant = restaurantService.getRestaurantById(order.getRestaurantId());
-        if (restaurant == null) {
-            throw new IllegalArgumentException("Restaurant not found");
-        }
-
+    public Order createOrder(OrderRequest orderRequest, User user) throws Exception {
         Cart cart = cartService.findCartByUserId(user.getId());
+
+        if (cart == null || cart.getCartItems().isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
+        Long restaurantId = null;
+        for (CartItem item : cart.getCartItems()) {
+            Long currentRestaurantId = item.getFood().getRestaurant().getId();
+            if (restaurantId == null) {
+                restaurantId = currentRestaurantId;
+            } else if (!restaurantId.equals(currentRestaurantId)) {
+                throw new IllegalArgumentException("All items in the cart must be from the same restaurant");
+            }
+        }
+
+        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+        if (restaurant == null) throw new IllegalArgumentException("Restaurant not found");
+
+        Address shippingAddress;
+        if (orderRequest.getAddressId() != null) {
+            shippingAddress = addressRepository.findById(orderRequest.getAddressId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid address ID"));
+        } else {
+            throw new IllegalArgumentException("Shipping address is required");
+        }
 
         Order newOrder = new Order();
         newOrder.setCreatedAt(new Date());
@@ -78,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
             orderedFood.setOrder(newOrder);
 
             List<Extras> extrasList = new ArrayList<>();
-            if (cartItem.getExtras() != null && !cartItem.getExtras().isEmpty()) {
+            if (cartItem.getExtras() != null) {
                 for (Extras extra : cartItem.getExtras()) {
                     Extras managedExtra = extrasRepository.findById(extra.getId())
                             .orElseThrow(() -> new IllegalArgumentException("Extras not found: " + extra.getId()));
@@ -89,20 +105,15 @@ public class OrderServiceImpl implements OrderService {
             orderedFoods.add(orderedFood);
         }
 
-            orderedFoodRepository.saveAll(orderedFoods);
-
-
+        orderedFoodRepository.saveAll(orderedFoods);
         newOrder.setOrderedFoodList(orderedFoods);
+        Order savedOrder = orderRepository.save(newOrder);
 
-        Order savedOrder;
+        cartService.clearCart(user.getId());
 
-            savedOrder = orderRepository.save(newOrder);
-
-            cartService.clearCart(user.getId());
-
-
-        return savedOrder;
+        return newOrder;
     }
+
     @Override
     public Order updateOrderStatus(Long orderId, String status) throws Exception {
         Order order = getOrderById(orderId);
@@ -124,8 +135,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getOrdersByUserId(Long userId) throws Exception {
-        return orderRepository.findByCustomerId(userId);
+    public List<OrderDto> getOrdersByUserId(Long userId) throws Exception {
+        List<Order> orders = orderRepository.findByCustomerId(userId);
+
+        return orders.stream().map(this::mapOrderToDto).toList();
+
     }
 
     @Override
@@ -142,4 +156,60 @@ public class OrderServiceImpl implements OrderService {
         }
         return orders;
     }
+    public OrderDto mapOrderToDto(Order order) {
+
+            User user = userRepository.findById(order.getCustomer().getId()).orElseThrow();
+
+
+        OrderDto dto = new OrderDto();
+        dto.setId(order.getId());
+        dto.setOrderStatus(order.getOrderStatus());
+        dto.setCreatedAt(order.getCreatedAt());
+        dto.setTotalPrice(order.getTotalPrice());
+        dto.setTotalOfOrder(order.getTotalOfOrder());
+        dto.setUser(user);
+        RestaurantSimpleResponse rest = new RestaurantSimpleResponse();
+        rest.setId(order.getRestaurant().getId());
+        rest.setName(order.getRestaurant().getName());
+        rest.setCuisineType(order.getRestaurant().getCuisineType());
+        rest.setOpeningHours(order.getRestaurant().getOpeningHours());
+        rest.setClosingHours(order.getRestaurant().getClosingHours());
+        dto.setRestaurant(rest);
+
+        List<OrderedFoodResponse> orderedItems = order.getOrderedFoodList().stream().map(food -> {
+            OrderedFoodResponse foodRes = new OrderedFoodResponse();
+            foodRes.setId(food.getId());
+            foodRes.setQuantity(food.getQuantity());
+            foodRes.setTotalPrice(food.getTotalPrice());
+
+
+            FoodResponse foodResponse = new FoodResponse();
+            foodResponse.setId(food.getFood().getId());
+            foodResponse.setFoodName(food.getFood().getFoodName());
+            foodResponse.setPrice(food.getFood().getPrice());
+
+            List<ExtrasDto> extrasDtos = food.getExtras().stream()
+                    .map(extra -> new ExtrasDto(extra.getId(),extra.getName(), extra.getPrice())).toList();
+            foodResponse.setExtrasList(extrasDtos);
+
+            List<ImageResponse> imageResponses = food.getFood().getImagesList().stream()
+                    .map(image -> {
+                        ImageResponse imgRes = new ImageResponse();
+                        imgRes.setId(image.getId());
+                        imgRes.setUrl("http://localhost:8080/api/public/images/" + image.getId());
+                        return imgRes;
+                    }).toList();
+            foodResponse.setImagesList(imageResponses);
+
+            foodRes.setFood(foodResponse);
+
+            return foodRes;
+        }).toList();
+
+        dto.setOrderedFoodList(orderedItems);
+
+        return dto;
+    }
+
+
 }

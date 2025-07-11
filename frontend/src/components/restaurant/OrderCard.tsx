@@ -1,37 +1,68 @@
-import { CurrencyLira, LocationOn, Person, Receipt } from "@mui/icons-material";
+import { CurrencyLira, LocationOn, Person, Receipt, WhatsApp } from "@mui/icons-material";
 import { Badge, Box, Card, CardContent, MenuItem, Select } from "@mui/material";
+import { Phone } from "lucide-react";
 
-type OrderStatus = "Pending" | "Preparing" | "Out for Delivery" | "Delivered";
+type OrderStatus = "PENDING" | "PREPARING" | "COMPLETED" | "ON_WAY" | "DELIVERED" | "CANCELED";
 
-interface OrderItem {
-  name: string;
-  quantity: number;
+
+interface Extras{
+  id:number,
+
+}
+interface Image{
+  id:number;
+  url:string;
+}
+
+interface Food{
+  id:number;
+  extrasList:Extras[],
+   foodName:string,
+   imagesList:Image[]
+   price:number
+}
+interface Address{
+  id:number;
+  apartment:string;
+  cityName:string;
+  streetName:string;
+}
+
+interface User{
+  id:number;
+  username:string;
+  phoneNumber:string;
+  whatsAppNumber:string;
 }
 
 interface Order {
-  id: string;
+  id: number;
   customerName: string;
-  address: string;
-  items: OrderItem[];
-  total: number;
-  status: OrderStatus;
+  shippingAddress: Address;
+  // items: OrderItem[];
+  totalOfOrder: number;
+  orderStatus: OrderStatus;
+  orderedFoodList:{id:number, quantity:number, totalPrice:number, food:Food}[]
+  user:User;
+  totalPrice:number
 }
+
 
 interface OrderCardProps {
   order: Order;
-  onStatusUpdate: (orderId: string, newStatus: OrderStatus) => void;
+  onStatusUpdate: (orderId: number, newStatus: OrderStatus) => void;
 }
 
 const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
-      case "Pending":
+      case "PENDING":
         return "bg-orange-100 text-orange-800 border-orange-200";
-      case "Preparing":
+      case "PREPARING":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Out for Delivery":
+      case "ON_WAY":
         return "bg-red-100 text-red-800 border-red-200";
-      case "Delivered":
+      case "DELIVERED":
         return "bg-green-100 text-green-800 border-green-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
@@ -40,14 +71,13 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
 
   const getAvailableStatuses = (currentStatus: OrderStatus): OrderStatus[] => {
     const allStatuses: OrderStatus[] = [
-      "Pending",
-      "Preparing",
-      "Out for Delivery",
-      "Delivered",
+      "PENDING",
+      "PREPARING",
+      "ON_WAY",
+      "DELIVERED",
     ];
     const currentIndex = allStatuses.indexOf(currentStatus);
 
-    // Allow current status and any status that comes after it
     return allStatuses.slice(currentIndex);
   };
 
@@ -74,10 +104,10 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
           </Box>
           <Badge
             className={`${getStatusColor(
-              order.status
+              order.orderStatus
             )} rounded-full px-3 py-1 text-sm font-medium`}
           >
-            {order.status}
+            {order.orderStatus}
           </Badge>
         </div>
       </Box>
@@ -88,13 +118,20 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
           <div className="flex items-center gap-2">
             <Person className="h-4 w-4 text-gray-500" />
             <span className="font-medium text-gray-900">
-              {order.customerName}
+              {order.user.username}
             </span>
+          </div>
+          <div className="flex items-center gap-2 ml-1">
+            <Phone className="h-4 w-4 text-gray-500" />
+            <span className="font-medium text-gray-900">{order.user.phoneNumber}</span>
+            <span className="font-medium text-gray-900">|</span>
+            <WhatsApp className="w-4 h-4 text-gray-500" />
+            <span className="font-medium text-gray-900">{order.user.whatsAppNumber}</span>
           </div>
           <div className="flex items-start gap-2">
             <LocationOn className="h-4 w-4 text-gray-500 mt-0.5" />
             <span className="text-sm text-gray-600 leading-relaxed">
-              {order.address}
+              {order.shippingAddress.apartment} {order.shippingAddress.streetName} {order.shippingAddress.cityName}
             </span>
           </div>
         </div>
@@ -107,13 +144,13 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
               <span className="font-medium text-gray-900">Order Items</span>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-              {order.items.map((item, index) => (
+              {order.orderedFoodList.map((order,index) =>(
                 <div
                   key={index}
                   className="flex justify-between items-center text-sm"
                 >
-                  <span className="font-medium text-gray-900">{item.name}</span>
-                  <span className="text-gray-600">x{item.quantity}</span>
+                  <span className="font-medium text-gray-900">{order.food.foodName}</span>
+                  <span className="text-gray-600">x{order.quantity}</span>
                 </div>
               ))}
             </div>
@@ -126,18 +163,19 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
             <div className="flex items-center gap-2">
               <CurrencyLira className="h-4 w-4 text-green-600" />
               <span className="text-xl font-bold text-green-600">
-                ${order.total.toFixed(2)}
+                {order.totalPrice.toFixed(2)}
               </span>
             </div>
           </div>
 
           {/* Status Update Dropdown */}
-          <div className="space-y-2">
+          { order.orderStatus != "CANCELED" &&
+            <div className="space-y-2">
             <label className="text-sm flex flex-col font-medium text-gray-900">
               Update Status
             </label>
             <Select
-              value={order.status}
+              value={order.orderStatus}
               onChange={(event) => handleStatusChange(event.target.value)}
               fullWidth
               sx={{
@@ -145,20 +183,21 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
                   padding: "8px 12px",
                 },
               }}
-            >
-              {getAvailableStatuses(order.status).map((status) => (
+              >
+              {getAvailableStatuses(order.orderStatus).map((status) => (
                 <MenuItem key={status} value={status}>
                   <Badge
                     className={`${getStatusColor(
                       status
                     )} rounded-full px-3 py-1 text-sm font-medium`}
-                  >
+                    >
                     {status}
                   </Badge>
                 </MenuItem>
               ))}
             </Select>
           </div>
+            }
         </div>
       </CardContent>
     </Card>

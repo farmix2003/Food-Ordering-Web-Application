@@ -14,6 +14,6 @@ public interface OrderService {
     void cancelOrder(Long orderId) throws Exception;
     List<OrderDto> getOrdersByUserId(Long userId) throws Exception;
     Order getOrderById(Long orderId) throws Exception;
-    List<Order> getRestartOrders(Long restaurantId, String status) throws Exception;
+    List<OrderDto> getRestaurantOrders(Long restaurantId, String status) throws Exception;
     OrderDto mapOrderToDto(Order order);
 }

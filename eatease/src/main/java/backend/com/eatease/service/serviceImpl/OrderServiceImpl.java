@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -117,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order updateOrderStatus(Long orderId, String status) throws Exception {
         Order order = getOrderById(orderId);
-        if (status.equals("PENDING") || status.equals("COMPLETED") || status.equals("DELIVERED") || status.equals("ON_WAY")) {
+        if (status.equals("PENDING") || status.equals("PREPARING") || status.equals("COMPLETED") || status.equals("DELIVERED") || status.equals("ON_WAY")) {
             order.setOrderStatus(status);
             return orderRepository.save(order);
         }
@@ -148,14 +147,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getRestartOrders(Long restaurantId, String status) throws Exception {
-
+    public List<OrderDto> getRestaurantOrders(Long restaurantId, String status) throws Exception {
         List<Order> orders = orderRepository.findByRestaurantId(restaurantId);
-        if (status != null && status.isEmpty()) {
-            orders = orders.stream().filter(order -> order.getOrderStatus().equals(status)).toList();
+
+        if (status != null && !status.isEmpty()) {
+            orders = orders.stream()
+                    .filter(order -> order.getOrderStatus().equalsIgnoreCase(status))
+                    .toList();
         }
-        return orders;
+
+        return orders.stream().map(this::mapOrderToDto).toList();
     }
+
     public OrderDto mapOrderToDto(Order order) {
 
             User user = userRepository.findById(order.getCustomer().getId()).orElseThrow();
@@ -175,7 +178,7 @@ public class OrderServiceImpl implements OrderService {
         rest.setOpeningHours(order.getRestaurant().getOpeningHours());
         rest.setClosingHours(order.getRestaurant().getClosingHours());
         dto.setRestaurant(rest);
-
+        dto.setShippingAddress(order.getShippingAddress());
         List<OrderedFoodResponse> orderedItems = order.getOrderedFoodList().stream().map(food -> {
             OrderedFoodResponse foodRes = new OrderedFoodResponse();
             foodRes.setId(food.getId());

@@ -1,98 +1,104 @@
 import { ChevronLeft } from "@mui/icons-material";
 import { Box, Card, CardContent } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import OrderCard from "./OrderCard";
+import { changeOrderStatus, getRestaurantByUserId, getRestaurantOrders } from "../../server/server";
 
-type OrderStatus = "Pending" | "Preparing" | "Out for Delivery" | "Delivered";
+type OrderStatus = "PENDING" | "PREPARING" | "COMPLETED" | "ON_WAY" | "DELIVERED" | "CANCELED";
 
 interface OrderItem {
   name: string;
   quantity: number;
 }
+interface Extras{
+  id:number,
+
+}
+interface Image{
+  id:number;
+  url:string;
+}
+
+interface Food{
+  id:number;
+  extrasList:Extras[],
+   foodName:string,
+   imagesList:Image[]
+   price:number
+}
+interface Address{
+  id:number;
+  apartment:string;
+  cityName:string;
+  streetName:string;
+}
+
+interface User{
+  id:number;
+  username:string;
+  phoneNumber:string;
+  whatsAppNumber:string;
+}
 
 interface Order {
-  id: string;
+  id: number;
   customerName: string;
-  address: string;
+  shippingAddress: Address;
   items: OrderItem[];
-  total: number;
-  status: OrderStatus;
+  totalOfOrder: number;
+  orderStatus: OrderStatus;
+  orderedFoodList:{id:number, quantity:number, totalPrice:number, food:Food}[]
+  user:User;
+  totalPrice:number
+}
+interface Restaurant{
+  id:number
 }
 
 const OrderManagement = () => {
 
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-001",
-      customerName: "Sarah Johnson",
-      address: "123 Main St, Downtown, City 12345",
-      items: [
-        { name: "Margherita Pizza", quantity: 2 },
-        { name: "Caesar Salad", quantity: 1 },
-        { name: "Garlic Bread", quantity: 1 },
-      ],
-      total: 32.5,
-      status: "Pending",
-    },
-    {
-      id: "ORD-002",
-      customerName: "Mike Chen",
-      address: "456 Oak Ave, Midtown, City 67890",
-      items: [
-        { name: "Chicken Alfredo", quantity: 1 },
-        { name: "Tiramisu", quantity: 2 },
-      ],
-      total: 28.99,
-      status: "Preparing",
-    },
-    {
-      id: "ORD-003",
-      customerName: "Emily Rodriguez",
-      address: "789 Pine Rd, Uptown, City 54321",
-      items: [
-        { name: "BBQ Burger", quantity: 1 },
-        { name: "Sweet Potato Fries", quantity: 1 },
-        { name: "Chocolate Shake", quantity: 1 },
-      ],
-      total: 24.75,
-      status: "Out for Delivery",
-    },
-    {
-      id: "ORD-004",
-      customerName: "David Kim",
-      address: "321 Elm St, Eastside, City 98765",
-      items: [
-        { name: "Vegetarian Wrap", quantity: 2 },
-        { name: "Fresh Juice", quantity: 2 },
-      ],
-      total: 19.5,
-      status: "Delivered",
-    },
-    {
-      id: "ORD-005",
-      customerName: "Lisa Thompson",
-      address: "654 Maple Dr, Westside, City 13579",
-      items: [
-        { name: "Spaghetti Carbonara", quantity: 1 },
-        { name: "Bruschetta", quantity: 1 },
-        { name: "Italian Soda", quantity: 1 },
-      ],
-      total: 26.25,
-      status: "Pending",
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [restaurant,setRestaurant] = useState<Restaurant>()
 
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
+  const getRestaurant = async () =>{
+      const data = await getRestaurantByUserId();
+      setRestaurant(data)
+  }
+
+  
+  const getRestaurantOrder = async() =>{
+    if(restaurant?.id){
+      const data = await getRestaurantOrders(restaurant?.id)
+      console.log(data)
+      setOrders(data)
+    }
+  }
+  useEffect(() =>{
+   getRestaurant()
+  },[])
+ useEffect(() => {
+  if (restaurant?.id) {
+    getRestaurantOrder();
+  }
+}, [restaurant]);
+
+
+  const updateOrderStatus = async(orderId: number, newStatus: OrderStatus) => {
+    await changeOrderStatus(orderId, newStatus)
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
         order.id === orderId ? { ...order, status: newStatus } : order
       )
     );
+    getRestaurantOrder()
   };
+ useMemo(()=>{
+  getRestaurantOrder()
+ },[])
 
   const getStatusCounts = () => {
     return orders.reduce((acc, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
+      acc[order.orderStatus] = (acc[order.orderStatus] || 0) + 1;
       return acc;
     }, {} as Record<OrderStatus, number>);
   };
@@ -123,22 +129,22 @@ const OrderManagement = () => {
             {[
               {
                 status: "Pending",
-                count: statusCounts.Pending || 0,
+                count: statusCounts.PENDING || 0,
                 color: "border-orange-400 bg-orange-50",
               },
               {
-                status: "Preparing",
-                count: statusCounts.Preparing || 0,
-                color: "border-blue-400 bg-blue-50",
+                status:"Preparing",
+                count: statusCounts.PREPARING || 0,
+                color: "border-gray-400 bg-gray-200"
               },
               {
-                status: "Out for Delivery",
-                count: statusCounts["Out for Delivery"] || 0,
+                status: "On Way",
+                count: statusCounts["ON_WAY"] || 0,
                 color: "border-red-400 bg-red-50",
               },
               {
                 status: "Delivered",
-                count: statusCounts.Delivered || 0,
+                count: statusCounts.DELIVERED || 0,
                 color: "border-green-400 bg-green-50",
               },
             ].map(({ status, count, color }) => (

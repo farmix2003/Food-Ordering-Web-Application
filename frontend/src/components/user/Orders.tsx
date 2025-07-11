@@ -69,10 +69,14 @@ const Orders = () => {
     switch (status) {
       case "PENDING":
         return "text-yellow-600 bg-yellow-100";
-      case "COMPLETED":
+      case "DELIVERED":
         return "text-green-600 bg-green-100";
       case "CANCELLED":
         return "text-red-600 bg-red-100";
+      case "ON_WAY":
+        return "text-blue-600 bg-cyan-100";
+      case "PREPARING":
+        return 'text-orange-600 bg-brown-100'
       default:
         return "text-gray-600 bg-gray-100";
     }

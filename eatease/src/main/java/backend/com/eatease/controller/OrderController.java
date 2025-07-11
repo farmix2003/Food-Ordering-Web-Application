@@ -19,11 +19,14 @@ import java.util.List;
 @RequestMapping("/api/public")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public OrderController(OrderService orderService, UserService userService) {
+        this.orderService = orderService;
+        this.userService = userService;
+    }
 
     @PostMapping("/order")
     public ResponseEntity<Order> orderFood(@RequestHeader("Authorization")String jwt,

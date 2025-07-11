@@ -1,17 +1,31 @@
 package backend.com.eatease.controller;
 
+import backend.com.eatease.dto.OrderDto;
 import backend.com.eatease.entity.Order;
 import backend.com.eatease.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
 public class OrderAdminController {
 
-    @Autowired
-    private OrderService orderService;
+
+    private final OrderService orderService;
+
+    public OrderAdminController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping("/restaurant/{id}/orders")
+    public ResponseEntity<List<OrderDto>> getRestaurantOrders(@RequestHeader("Authorization") String jwt,
+                                                             @PathVariable Long id,
+                                                             @RequestParam(required = false) String status
+                                                         ) throws Exception {
+        return ResponseEntity.ok(orderService.getRestaurantOrders(id, status));
+    }
 
     @PutMapping("/order/status/{id}")
     public ResponseEntity<Order> updateOrderStatus(@RequestHeader("Authorization")String jwt,

@@ -484,6 +484,26 @@ const cancelOrder = async(id:number) =>{
   return response.data
 }
 
+const getRestaurantOrders = async (restaurantId: number, status?: string) => {
+  const response = await axios.get(`/admin/restaurant/${restaurantId}/orders`, {
+    headers: {
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+    },
+    params: status ? { status } : {},
+  });
+  return response.data;
+};
+
+
+const changeOrderStatus = async(orderId:number, status:string) =>{
+  const response = await axios.put(`/admin/order/status/${orderId}?status=${status}`,{},{
+    headers:{
+      Authorization:`Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
 export {
   loginUser,
   registerUser,
@@ -520,5 +540,7 @@ export {
   clearCart,
   createOrder,
   getUserOrders,
-  cancelOrder
+  cancelOrder,
+  getRestaurantOrders,
+  changeOrderStatus
 };

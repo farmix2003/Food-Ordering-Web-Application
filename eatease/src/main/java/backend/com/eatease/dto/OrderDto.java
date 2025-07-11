@@ -1,6 +1,7 @@
 package backend.com.eatease.dto;
 
 
+import backend.com.eatease.entity.Address;
 import backend.com.eatease.entity.User;
 import backend.com.eatease.response.OrderedFoodResponse;
 import backend.com.eatease.response.RestaurantSimpleResponse;
@@ -17,6 +18,7 @@ public class OrderDto {
     private double totalPrice;
     private int totalOfOrder;
     private User user;
+    private Address shippingAddress;
     private RestaurantSimpleResponse restaurant;
     private List<OrderedFoodResponse> orderedFoodList;
 }

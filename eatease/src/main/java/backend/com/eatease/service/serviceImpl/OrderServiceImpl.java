@@ -45,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ExtrasRepository extrasRepository;
 
+
     @Override
     @Transactional
     public Order createOrder(OrderRequest orderRequest, User user) throws Exception {
@@ -67,13 +68,8 @@ public class OrderServiceImpl implements OrderService {
         Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
         if (restaurant == null) throw new IllegalArgumentException("Restaurant not found");
 
-        Address shippingAddress;
-        if (orderRequest.getAddressId() != null) {
-            shippingAddress = addressRepository.findById(orderRequest.getAddressId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid address ID"));
-        } else {
-            throw new IllegalArgumentException("Shipping address is required");
-        }
+        Address shippingAddress = addressRepository.findById(orderRequest.getAddressId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid address ID"));
 
         Order newOrder = new Order();
         newOrder.setCreatedAt(new Date());
@@ -84,13 +80,15 @@ public class OrderServiceImpl implements OrderService {
         newOrder.setTotalPrice(cartService.calculateCartTotal(cart));
         newOrder.setTotalOfOrder(cart.getCartItems().size());
 
+        Order savedOrder = orderRepository.save(newOrder);
+
         List<OrderedFood> orderedFoods = new ArrayList<>();
         for (CartItem cartItem : cart.getCartItems()) {
             OrderedFood orderedFood = new OrderedFood();
             orderedFood.setFood(cartItem.getFood());
             orderedFood.setQuantity(cartItem.getQuantity());
             orderedFood.setTotalPrice(cartItem.getTotalPrice());
-            orderedFood.setOrder(newOrder);
+            orderedFood.setOrder(savedOrder);
 
             List<Extras> extrasList = new ArrayList<>();
             if (cartItem.getExtras() != null) {
@@ -105,12 +103,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderedFoodRepository.saveAll(orderedFoods);
-        newOrder.setOrderedFoodList(orderedFoods);
-        Order savedOrder = orderRepository.save(newOrder);
 
+        savedOrder.setOrderedFoodList(orderedFoods); // optional, if you want to attach them
         cartService.clearCart(user.getId());
 
-        return newOrder;
+        return savedOrder;
     }
 
     @Override

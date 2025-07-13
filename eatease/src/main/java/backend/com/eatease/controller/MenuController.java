@@ -2,6 +2,7 @@ package backend.com.eatease.controller;
 
 import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.dto.RestaurantDto;
+import backend.com.eatease.entity.Menu;
 import backend.com.eatease.entity.Restaurant;
 import backend.com.eatease.entity.User;
 import backend.com.eatease.service.MenuService;
@@ -33,6 +34,13 @@ public class MenuController {
     public ResponseEntity<List<MenuDto>> searchMenu(@RequestParam("keyword") String keyword) throws Exception {
         List<MenuDto> menus = menuService.searchFood(keyword);
         return ResponseEntity.ok().body(menus);
+    }
+
+    @GetMapping("/menu/popular")
+    public ResponseEntity<List<MenuDto>> getPopularFoods(){
+       List<MenuDto> popularFoods = menuService.getPopularFoods();
+
+       return ResponseEntity.ok(popularFoods);
     }
 
     @GetMapping("/restaurants")

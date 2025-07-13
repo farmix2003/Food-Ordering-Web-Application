@@ -24,4 +24,5 @@ public interface MenuService {
      List<MenuDto> getMenus();
      void addImage(Long menuId, MultipartFile file) throws IOException;
      void deleteImages(Long menuId, List<Long> imageIds);
+     List<MenuDto> getPopularFoods();
 }

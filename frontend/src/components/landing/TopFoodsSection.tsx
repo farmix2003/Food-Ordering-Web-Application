@@ -7,15 +7,16 @@ import {
   CardContent,
   Button,
   Rating,
-  IconButton,
   useTheme,
 } from "@mui/material";
 import {
   AddShoppingCart,
-  ChevronLeft,
-  ChevronRight,
+  CurrencyLira,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { getPoplularFoods } from "../../server/server";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const topFoods = [
   {
@@ -60,8 +61,36 @@ const topFoods = [
   },
 ];
 
+interface Image {
+  id:number;
+  url:string;
+}
+
+interface MenuItem{
+  id:number;
+  available:boolean;
+  foodName:string;
+  images:Image[];
+  restauantId:number;
+  categoryName:string;
+  price:number
+}
+
 const TopFoodsSection = () => {
   const theme = useTheme();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const navigate = useNavigate()
+
+  const getPopularMenuItems = async() =>{
+     const data = await getPoplularFoods()
+     console.log(data.data)
+     setMenuItems(data.data)
+  }
+
+  useEffect(()=>{
+    getPopularMenuItems()
+  },[])
+
 
   return (
     <Box sx={{ py: 8, backgroundColor: "background.default" }}>
@@ -83,7 +112,7 @@ const TopFoodsSection = () => {
         </motion.div>
 
         <Box sx={{ display: "flex", overflowX: "auto", gap: 3, pb: 2 }}>
-          {topFoods.map((food, index) => (
+          {menuItems.map((food, index) => (
             <motion.div
               key={food.id}
               initial={{ opacity: 0, x: 50 }}
@@ -106,24 +135,16 @@ const TopFoodsSection = () => {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={food.image}
-                  alt={food.name}
+                  image={food.images[0].url}
+                  alt={food.foodName}
                 />
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    {food.name}
+                    {food.foodName}
                   </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Rating
-                      value={food.rating}
-                      precision={0.1}
-                      size="small"
-                      readOnly
-                    />
-                    <Typography variant="body2" sx={{ ml: 1 }}>
-                      ({food.rating})
+                    <Typography variant="body2">
+                      {food.categoryName}
                     </Typography>
-                  </Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -136,13 +157,14 @@ const TopFoodsSection = () => {
                       color="primary.main"
                       fontWeight="bold"
                     >
-                      {food.price}
+                     <CurrencyLira className="w-4 h-4" /> {food.price}
                     </Typography>
                     <Button
                       variant="contained"
                       size="small"
                       startIcon={<AddShoppingCart />}
                       sx={{ borderRadius: 2 }}
+                      onClick={()=>navigate('/login')}
                     >
                       Add
                     </Button>

@@ -19,6 +19,7 @@ public class OrderedFood {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "menu_id")
     private Menu food;
 
     private int quantity;

@@ -228,4 +228,20 @@ public class MenuServiceImpl implements MenuService {
         imageRepository.deleteAll(imagesToDelete);
     }
 
+    @Override
+    public List<MenuDto> getPopularFoods() {
+        List<OrderedFood> orderedFoods = orderedFoodRepository.findAll();
+        Map<Menu, Long> foodCounts = orderedFoods.stream()
+                .collect(Collectors.groupingBy(OrderedFood::getFood, Collectors.counting()));
+
+        return foodCounts.entrySet().stream()
+                .sorted(Map.Entry.<Menu, Long>comparingByValue().reversed())
+                .limit(10)
+                .map(Map.Entry::getKey)
+                .map(this::toDto)
+                .toList();
+    }
+
+
+
 }

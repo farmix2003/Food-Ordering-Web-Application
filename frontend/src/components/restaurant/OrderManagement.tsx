@@ -12,6 +12,7 @@ interface OrderItem {
 }
 interface Extras{
   id:number,
+  name:string
 
 }
 interface Image{

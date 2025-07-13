@@ -76,17 +76,15 @@ const Navbar = () => {
   const [isLogoutModelOpen, setIsLogoutModelOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartProps>();
   const [user, setUser] = useState<User | null>(null);
-  const [token,setToken] = useState<string|null>("")
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
-  
+  const token = window.localStorage.getItem("token")
   const getUser = async () => {
     const data = await getUserByJwt();
     setUser(data);
   };
   
   useEffect(() => {
-      setToken(window.localStorage.getItem("token"))
     getUser();
   }, []);
 
@@ -165,12 +163,12 @@ const Navbar = () => {
             {!isMobile && (
               <>
                 {/* Role-based Panel Button */}
-                {user?.role === "ROLE_ADMIN" && (
+                { token && user?.role === "ROLE_ADMIN" && (
                   <Button variant="contained" onClick={() => navigate("/admin/dashboard")} sx={{ mr: 2, bgcolor: "#FF6B35" }}>
                     Admin Panel
                   </Button>
                 )}
-                {user?.role === "ROLE_RESTAURANT_OWNER" && (
+                {token && user?.role === "ROLE_RESTAURANT_OWNER" && (
                   <Button variant="contained" onClick={() => navigate("/restaurant/dashboard")} sx={{ mr: 2, bgcolor: "#FF6B35" }}>
                     Restaurant Panel
                   </Button>
@@ -213,7 +211,7 @@ const Navbar = () => {
                     onClick={handleClickAvatar}
                     sx={{ border: "1px solid black", cursor: "pointer" }}
                   >
-                    {initials}
+                    {token && initials}
                   </Avatar>
                 )}
               </>

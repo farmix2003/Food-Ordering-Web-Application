@@ -9,6 +9,7 @@ import HowItWorksSection from "../components/landing/HowItWorks";
 import AboutSection from "../components/landing/AboutSection";
 import Footer from "../components/Footer";
 import BackToTop from "../components/landing/BacToTop";
+import TopFoodsSection from "../components/landing/TopFoodsSection";
 const Index = () => {
  
 
@@ -19,7 +20,7 @@ const Index = () => {
       <div>
         <HeroSection />
         <SearchSection />
-        {/* <TopFoodsSection /> */}
+        <TopFoodsSection />
         <TopRestaurants />
         <MenuSection />
         <FeaturesSection />

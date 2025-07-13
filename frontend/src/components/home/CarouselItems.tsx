@@ -1,19 +1,36 @@
 import { ShoppingCart } from "@mui/icons-material";
 import { Button, Card } from "@mui/material";
+import { getRestaurantById } from "../../server/server";
+import { useEffect, useState } from "react";
 
 type CarouselItemProps = {
-  image: string;
-  name: string;
-  price?: string;
-  restaurant?: string;
+  available:boolean;
+  foodName:string;
+  image:string;
+  restaurantId:number;
+  price:number
 };
+
+
 
 const CarouselItems = ({
   image,
-  name,
+  foodName,
   price,
-  restaurant,
+  restaurantId,
 }: CarouselItemProps) => {
+
+  const [restaurant, setRestaurant] = useState<string>()
+  const getRestaurant = async() =>{
+    const response = await getRestaurantById(restaurantId)
+    setRestaurant(response.name)
+  }
+
+  useEffect(()=>{
+    getRestaurant()
+  },[])
+
+
   return (
     <Card
       component={"div"}
@@ -26,7 +43,7 @@ const CarouselItems = ({
         style={{ objectFit: "cover", height: "14rem", width: "100%" }}
       />
       <span className="py-2 px-1 font-semibold text-xl text-gray-400">
-        {name}
+        {foodName}
       </span>
       <span className="text-gray-700 p-1 font-bold">{restaurant}</span>
       {/* <Card className="flex items-center justify-between w-full px-2 py-1 bg-gray-100 rounded-md"> */}

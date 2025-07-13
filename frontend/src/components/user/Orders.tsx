@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { cancelOrder, getUserByJwt, getUserOrders } from "../../server/server";
-import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/seperator";
 import { CurrencyLira } from "@mui/icons-material";
 import { Button } from "../ui/button";
 import { Box } from "@mui/material";
+import { useNavigate } from "react-router-dom"; // 🔴 new
 
 interface Extras {
   id: number;
@@ -43,20 +43,21 @@ interface Order {
   totalOfOrder: number;
   orderStatus: string;
   orderedFoodList: OrderedFood[];
-  user:{addressList: Address[]};
+  user: { addressList: Address[] };
 }
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [error, setError] = useState<string>(""); // 🔴
+  const navigate = useNavigate(); // 🔴
 
   const fetchOrders = async () => {
     try {
       const user = await getUserByJwt();
       const data = await getUserOrders(user.id);
       setOrders(data);
-      console.log(data)
     } catch (error) {
-      toast.error("Failed to fetch orders");
+      setError("Failed to fetch orders.");
     }
   };
 
@@ -64,6 +65,9 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+  useMemo(() => {
+    fetchOrders();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -76,27 +80,40 @@ const Orders = () => {
       case "ON_WAY":
         return "text-blue-600 bg-cyan-100";
       case "PREPARING":
-        return 'text-orange-600 bg-brown-100'
+        return "text-orange-600 bg-brown-100";
       default:
         return "text-gray-600 bg-gray-100";
     }
   };
 
-  const handleCancelOrder = (orderId: number) => {
-     cancelOrder(orderId)
-     fetchOrders()
-    toast.info(`Cancel requested for order #${orderId}`);
+  const handleCancelOrder = async (orderId: number) => {
+    try {
+      await cancelOrder(orderId);
+      fetchOrders();
+    } catch (e) {
+      setError("Failed to cancel order."); // 🔴
+    }
   };
- 
-  useMemo(() =>{
-    fetchOrders()
-  },[])
+
+  if (error) {
+    return (
+      <div className="text-center mt-16 text-red-500 text-lg">
+        {error}
+      </div>
+    );
+  }
 
   if (!orders || orders.length === 0) {
     return (
       <div className="text-center mt-16">
         <h2 className="text-2xl font-bold">No Orders Found</h2>
         <p className="text-gray-600 mt-2">Place your first order to see it here.</p>
+        <Button
+          className="mt-4"
+          onClick={() => navigate("/add-address")} // 🔴 Adjust path as needed
+        >
+          Add Address
+        </Button>
       </div>
     );
   }
@@ -104,6 +121,21 @@ const Orders = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Your Orders</h1>
+
+      {/* 🔴 Show Add Address if first order has no address */}
+      {orders[0].user.addressList.length === 0 && (
+        <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-6">
+          You don’t have any saved address.{" "}
+          <Button
+            variant="outline"
+            className="ml-2 border border-yellow-600 text-yellow-700"
+            onClick={() => navigate("/add-address")}
+          >
+            Add Address
+          </Button>
+        </div>
+      )}
+
       {orders.map((order) => (
         <Card key={order.id} className="mb-6 shadow-sm">
           <CardHeader>
@@ -123,19 +155,18 @@ const Orders = () => {
               </div>
             </CardTitle>
           </CardHeader>
+
           <CardContent>
-          { order.user &&
+            {order.user && order.user.addressList.length > 0 && (
               <div className="mb-2 text-sm text-gray-700">
-              {order.user.addressList.map((item, idx) => (
-                <div key={idx}>
-                  <strong>Address:</strong> {item.apartment},{" "}
-                  {item.streetName},{" "}
-                  {item.cityName}
-                </div>
-              ))}
+                {order.user.addressList.map((item, idx) => (
+                  <div key={idx}>
+                    <strong>Address:</strong> {item.apartment}, {item.streetName},{" "}
+                    {item.cityName}
+                  </div>
+                ))}
               </div>
-}  
-          
+            )}
 
             <Separator className="my-3" />
 
@@ -165,7 +196,6 @@ const Orders = () => {
                     </p>
                   )}
                 </div>
-                <p>{}</p>
               </div>
             ))}
 
@@ -174,8 +204,7 @@ const Orders = () => {
             <div className="flex justify-between text-sm font-semibold">
               <span>Total Items: {order.totalOfOrder}</span>
               <span>
-                Total: <CurrencyLira fontSize="small" />{" "}
-                {order.totalPrice.toFixed(2)}
+                Total: <CurrencyLira fontSize="small" /> {order.totalPrice.toFixed(2)}
               </span>
             </div>
 

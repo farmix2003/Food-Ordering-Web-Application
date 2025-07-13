@@ -3,6 +3,9 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import CarouselItems from "./CarouselItems";
 import { TopMeals } from "../../constants/TopMeals";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getPoplularFoods } from "../../server/server";
 
 // interface CarouselProps {
 //   t: (value: string) => string;
@@ -15,7 +18,24 @@ type CarouselItemProps = {
   restaurant?: string;
 };
 
+interface Image {
+  id:number;
+  url:string;
+}
+
+interface MenuItem{
+  id:number;
+  available:boolean;
+  foodName:string;
+  images:Image[];
+  restaurantId:number;
+  categoryName:string;
+  price:number
+}
+
+
 const Carousel = () => {
+
   const settings = {
     dots: true,
     infinite: true,
@@ -62,16 +82,31 @@ const Carousel = () => {
     ],
   };
 
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+    const navigate = useNavigate()
+  
+    const getPopularMenuItems = async() =>{
+       const data = await getPoplularFoods()
+       console.log(data.data)
+       setMenuItems(data.data)
+    }
+  
+    useEffect(()=>{
+      getPopularMenuItems()
+    },[])
+
+
   return (
     <section className="w-[100%] p-0 lg:py-10 lg:px-20 bg-white rounded-lg shadow-md">
       <Slider {...settings}>
-        {TopMeals.map((item: CarouselItemProps) => (
+        {menuItems.map((item: MenuItem) => (
           <CarouselItems
             key={item.id}
-            name={item.name}
-            image={item.image}
+            foodName={item.foodName}
+            image={item.images[0].url}
             price={item.price}
-            restaurant={item.restaurant}
+            restaurantId={item.restaurantId}
+            available={item.available}
           />
         ))}
       </Slider>

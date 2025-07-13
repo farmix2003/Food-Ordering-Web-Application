@@ -7,6 +7,7 @@ type OrderStatus = "PENDING" | "PREPARING" | "COMPLETED" | "ON_WAY" | "DELIVERED
 
 interface Extras{
   id:number,
+    name:string
 
 }
 interface Image{
@@ -150,6 +151,9 @@ const OrderCard = ({ order, onStatusUpdate }: OrderCardProps) => {
                   className="flex justify-between items-center text-sm"
                 >
                   <span className="font-medium text-gray-900">{order.food.foodName}</span>
+                  {order.food.extrasList.map(extra =>(
+                    <span>{extra.name}</span>
+                  ))}
                   <span className="text-gray-600">x{order.quantity}</span>
                 </div>
               ))}

@@ -597,6 +597,10 @@ const searchRestaurants = async(keyword:string) =>{
   return (await response).data
 }
 
+const getPoplularFoods = async() =>{
+  const response = await axios.get("/all/menu/popular")
+  return response
+}
 
 export {
   loginUser,
@@ -647,5 +651,6 @@ export {
   deleteMenuItem,
   getAllOrders,
   searchMenu,
-  searchRestaurants
+  searchRestaurants,
+  getPoplularFoods,
 };

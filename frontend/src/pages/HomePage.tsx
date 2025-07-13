@@ -62,7 +62,7 @@ const HomePage = () => {
         </div>
         <div className="black-cover"></div>
         {/* Top Food Carousel */}
-        <div className="mb-12 mt-[240px]">
+        <div className="mb-12 mt-[300px]">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Popular Dishes
           </h2>

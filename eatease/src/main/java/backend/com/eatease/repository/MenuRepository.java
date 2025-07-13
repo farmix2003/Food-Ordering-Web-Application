@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
-    @Query("SELECT f FROM Menu f WHERE f.foodName LIKE CONCAT('%', :keyword, '%') " +
-            "OR f.category.categoryName LIKE CONCAT('%', :keyword, '%')")
-    List<Menu> searchFood(@Param("keyword") String keyword);
+        @Query("SELECT f FROM Menu f WHERE f.foodName LIKE CONCAT('%', :keyword, '%') " +
+                "OR f.category.categoryName LIKE CONCAT('%', :keyword, '%')")
+        List<Menu> searchFood(@Param("keyword") String keyword);
 
     List<Menu> findByRestaurantId(Long restaurantId);
 

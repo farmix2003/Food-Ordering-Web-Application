@@ -504,6 +504,100 @@ const changeOrderStatus = async(orderId:number, status:string) =>{
   return response.data
 }
 
+const editCategory = async(id:number, categoryName:string) =>{
+  const response = await axios.put(`/admin/category/edit/${id}`,{categoryName},{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+const deleteCategory = async (id:number) =>{
+  const response = await axios.delete(`/admin/category/delete/${id}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+const updateExtras = async(id:number, name:string, price:number, inStock:boolean) =>{
+  const response = await axios.put(`/admin/extras/edit/${id}`,{
+    name, price, inStock
+  },
+{
+  headers:{
+    Authorization: `Bearer ${window.localStorage.getItem('token')}`
+  }
+})
+return response.data
+}
+const deleteExtra = async(id:number) =>{
+  const response = await axios.delete(`/admin/extras/delete/${id}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
+const updateMenuItem = async (id:number, foodName:string, description:string, price:number, categoryId:number, extrasIds:number[]) =>{
+
+  const response = await axios.put(`/admin/update/${id}`,{foodName, description, price,extrasIds,categoryId},{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
+const addImage = async(id:number, image:File|Blob) =>{
+  const formData = new FormData();
+  formData.append("image",image)
+  const response = await axios.post(`/admin/add/${id}/image`,formData,{
+    headers:{
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
+const deleteImagefromMenu = async(id:number, imageIds:number) =>{
+  const response = await axios.delete(`/admin/images/delete/${id}?ids=${imageIds}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+const deleteMenuItem = async(id:number) =>{
+  const response = await axios.delete(`/admin/delete/${id}`,{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
+    }
+  })
+  return response.data
+}
+
+const getAllOrders = async() =>{
+  const response = await axios.get("/admin/all",{
+    headers:{
+      Authorization: `Bearer ${window.localStorage.getItem("token")}`
+    }
+  })
+  return response.data;
+}
+
+const searchMenu = async(keyword:string) =>{
+  const response = axios.get(`/all/menu/search?keyword=${keyword}`)
+  return (await response).data
+}
+const searchRestaurants = async(keyword:string) =>{
+  const response = axios.get(`/all/restaurants/search?keyword=${keyword}`)
+  return (await response).data
+}
+
+
 export {
   loginUser,
   registerUser,
@@ -542,5 +636,16 @@ export {
   getUserOrders,
   cancelOrder,
   getRestaurantOrders,
-  changeOrderStatus
+  changeOrderStatus,
+  editCategory,
+  deleteCategory,
+  updateExtras,
+  deleteExtra,
+  updateMenuItem,
+  addImage,
+  deleteImagefromMenu,
+  deleteMenuItem,
+  getAllOrders,
+  searchMenu,
+  searchRestaurants
 };

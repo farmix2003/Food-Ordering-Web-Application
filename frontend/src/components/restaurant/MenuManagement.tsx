@@ -1,24 +1,33 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import { Plus } from 'lucide-react'
 import MenuItemCard from './MenuItem'
 
+interface Image{
+  id: number;
+  url: string;
+  fileName: string;
+}
+
 interface MenuItem {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    description: string;
-    extras: { name: string; price: number }[];
+  id: number;
+  foodName: string;
+  price: number;
+  images: Image[];
+  description: string;
+  extrasList: {id:number; name: string; price: number }[];
+  available:boolean;
+  categoryName:string;
+  restaurantId:number;
   }
 interface MenuItemCardProps {
     menuItems: MenuItem[];
     handleAddMenuItem: () => void;
     handleEditMenuItem: (item: MenuItem) => void;
-    handleDeleteMenuItem: (id: string) => void;
+    handleDeleteMenuItem: (id: number) => void;
   }
 const MenuManagement = ({menuItems, handleAddMenuItem, handleEditMenuItem, handleDeleteMenuItem}:MenuItemCardProps) => {
+ 
   return (
     <Card className="shadow-lg">
             <CardHeader>

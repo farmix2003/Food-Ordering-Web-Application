@@ -6,7 +6,9 @@ import backend.com.eatease.entity.Menu;
 import backend.com.eatease.entity.Restaurant;
 import backend.com.eatease.request.FoodRequest;
 import backend.com.eatease.request.UpdateTextBasedMenuItemRequest;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface MenuService {
@@ -20,5 +22,6 @@ public interface MenuService {
      Menu updateTextBasedMenuItem(Long id, UpdateTextBasedMenuItemRequest request);
      MenuDto toDto(Menu menu);
      List<MenuDto> getMenus();
-
+     void addImage(Long menuId, MultipartFile file) throws IOException;
+     void deleteImages(Long menuId, List<Long> imageIds);
 }

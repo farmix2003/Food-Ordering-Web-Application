@@ -4,6 +4,7 @@ import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.entity.Menu;
 import backend.com.eatease.entity.Restaurant;
 import backend.com.eatease.request.FoodRequest;
+import backend.com.eatease.request.UpdateTextBasedMenuItemRequest;
 import backend.com.eatease.response.MessageResponse;
 import backend.com.eatease.service.MenuService;
 import backend.com.eatease.service.RestaurantService;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -52,13 +55,7 @@ public class MenuAdminController {
         return ResponseEntity.ok().body(menus);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<MenuDto>> searchMenu(@RequestHeader("Authorization") String jwt,
-                                                 @RequestParam("keyword") String keyword
-    ) throws Exception {
-        List<MenuDto> menus = menuService.searchFood(keyword);
-        return ResponseEntity.ok().body(menus);
-    }
+
 
     @PutMapping("/status/{id}")
     public ResponseEntity<Menu> updateAvailableStatus(@RequestHeader("Authorization")String jwt,
@@ -66,5 +63,31 @@ public class MenuAdminController {
                                                       ) throws Exception {
         Menu menu = menuService.updateAvailableStatus(id);
         return ResponseEntity.ok().body(menu);
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Menu> updateMenuItem(@PathVariable Long id,
+                                               @RequestBody UpdateTextBasedMenuItemRequest request,
+                                               @RequestHeader("Authorization") String jwt
+                                               ){
+        Menu updatedMenuItem = menuService.updateTextBasedMenuItem(id,request);
+        return ResponseEntity.ok(updatedMenuItem);
+    }
+    @PostMapping("/add/{id}/image")
+    public ResponseEntity<String> addImage(@PathVariable Long id,
+                                           @RequestParam("image")MultipartFile img,
+                                           @RequestHeader("Authorization") String jwt
+                                           ) throws IOException {
+        menuService.addImage(id, img);
+
+        return ResponseEntity.ok("Image added successfully");
+    }
+
+    @DeleteMapping("/images/delete/{id}")
+    public ResponseEntity<String> deleteImages(@PathVariable Long id,
+                                               @RequestParam("ids") List<Long> imageIds,
+                                               @RequestHeader("Authorization") String jwt
+                                               ){
+        menuService.deleteImages(id, imageIds);
+        return ResponseEntity.ok("Images deleted successfully");
     }
 }

@@ -22,7 +22,7 @@ public interface RestaurantService {
 
     void deleteRestaurant(Long id) throws Exception;
 
-    List<Restaurant> searchRestaurants(String keyword) throws Exception;
+    List<RestaurantDto> searchRestaurants(String keyword) throws Exception;
 
     RestaurantDto getRestaurantByUserId(Long id) throws Exception;
 

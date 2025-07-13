@@ -11,5 +11,4 @@ public class UpdateTextBasedMenuItemRequest {
     private Double price;
     private Long categoryId;
     private List<Long> extrasIds;
-    private boolean available;
 }

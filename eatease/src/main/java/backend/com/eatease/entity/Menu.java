@@ -26,7 +26,7 @@ public class Menu {
 
     private Double price;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Category category;
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -39,7 +39,7 @@ public class Menu {
     @JsonBackReference(value = "restaurant-menus")
     private Restaurant restaurant;
 
-    @ManyToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Extras> extrasList = new ArrayList<>();
 
     private Date creationDate;

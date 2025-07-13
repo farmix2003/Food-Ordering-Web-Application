@@ -19,6 +19,12 @@ public class OrderAdminController {
         this.orderService = orderService;
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<OrderDto>> getAllOrders(@RequestHeader("Authorization")String jwt){
+        List<OrderDto> orderDtos = orderService.getAllOrders();
+        return ResponseEntity.ok(orderDtos);
+    }
+
     @GetMapping("/restaurant/{id}/orders")
     public ResponseEntity<List<OrderDto>> getRestaurantOrders(@RequestHeader("Authorization") String jwt,
                                                              @PathVariable Long id,

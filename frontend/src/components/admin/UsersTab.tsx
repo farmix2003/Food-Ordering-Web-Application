@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Paper,
   Table,
@@ -39,10 +39,13 @@ const UsersTab = () => {
   useEffect(() => {
     getUsers();
   }, []);
-  const handleChangeUserStatus = (id: number, status: string) => {
-    const data = changeUserStatus(id, status);
+  const handleChangeUserStatus =async (id: number, status: string) => {
+    await changeUserStatus(id, status);
     getUsers();
   };
+  useMemo(()=>{
+getUsers()
+  },[])
   const handleRoleFilterChange = (event: SelectChangeEvent) => {
     setRoleFilter(event.target.value);
   };
@@ -57,7 +60,7 @@ const UsersTab = () => {
         return "error";
       case "ROLE_RESTAURANT_OWNER":
         return "warning";
-      case "ROLE_USER":
+      case "ROLE_CUSTOMER":
         return "primary";
       default:
         return "default";
@@ -79,7 +82,7 @@ const UsersTab = () => {
             onChange={handleRoleFilterChange}
           >
             <MenuItem value="all">All Roles</MenuItem>
-            <MenuItem value="ROLE_USER">User</MenuItem>
+            <MenuItem value="ROLE_CUSTOMER">User</MenuItem>
             <MenuItem value="ROLE_RESTAURANT_OWNER">Restaurant Owner</MenuItem>
             <MenuItem value="ROLE_ADMIN">Admin</MenuItem>
           </Select>

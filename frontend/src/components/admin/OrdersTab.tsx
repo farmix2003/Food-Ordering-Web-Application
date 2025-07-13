@@ -10,105 +10,50 @@ import {
   Chip,
   Box,
 } from "@mui/material";
+import { getAllOrders } from "../../server/server";
+import { useEffect, useState } from "react";
 
 interface Order {
   id: number;
-  userName: string;
-  restaurant: string;
-  total: number;
-  status: "pending" | "confirmed" | "preparing" | "delivered" | "cancelled";
-  orderDate: string;
+  user: {id:number, username:string};
+  restaurant: {id:number, name:string};
+  totalPrice: number;
+  orderStatus: "PENDING" | "PREPARING" | "ON_WAY" | "DELIVERED" | "CANCELED";
+  createdAt: string;
 }
 
-const mockOrders: Order[] = [
-  {
-    id: 1001,
-    userName: "John Doe",
-    restaurant: "Pizza Palace",
-    total: 25.99,
-    status: "delivered",
-    orderDate: "2024-06-20",
-  },
-  {
-    id: 1002,
-    userName: "Jane Smith",
-    restaurant: "Sushi Express",
-    total: 45.5,
-    status: "preparing",
-    orderDate: "2024-06-21",
-  },
-  {
-    id: 1003,
-    userName: "Bob Johnson",
-    restaurant: "Burger Barn",
-    total: 18.75,
-    status: "confirmed",
-    orderDate: "2024-06-21",
-  },
-  {
-    id: 1004,
-    userName: "Alice Brown",
-    restaurant: "Taco Time",
-    total: 32.25,
-    status: "pending",
-    orderDate: "2024-06-22",
-  },
-  {
-    id: 1005,
-    userName: "Charlie Wilson",
-    restaurant: "Curry House",
-    total: 28.9,
-    status: "delivered",
-    orderDate: "2024-06-20",
-  },
-  {
-    id: 1006,
-    userName: "Diana Davis",
-    restaurant: "Greek Garden",
-    total: 41.3,
-    status: "cancelled",
-    orderDate: "2024-06-21",
-  },
-  {
-    id: 1007,
-    userName: "Eva Martinez",
-    restaurant: "BBQ Central",
-    total: 55.8,
-    status: "preparing",
-    orderDate: "2024-06-22",
-  },
-  {
-    id: 1008,
-    userName: "Frank Garcia",
-    restaurant: "Pizza Palace",
-    total: 22.45,
-    status: "confirmed",
-    orderDate: "2024-06-22",
-  },
-];
-
 const OrdersTab = () => {
+  const [orders, setOrders] = useState<Order[]>([])
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "delivered":
+      case "DELIVERED":
         return "success";
-      case "preparing":
+      case "PREPARING":
         return "info";
-      case "confirmed":
+      case "ON_WAY":
         return "primary";
-      case "pending":
+      case "PENDING":
         return "warning";
-      case "cancelled":
+      case "CANCELED":
         return "error";
       default:
         return "default";
     }
   };
 
+  const getOrders = async() =>{
+   const data = await getAllOrders();
+   console.log(data);
+   setOrders(data)
+  }
+  useEffect(()=>{
+    getOrders()
+  },[])
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "TRY",
     }).format(amount);
   };
 
@@ -151,7 +96,7 @@ const OrdersTab = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {mockOrders.map((order) => (
+            {orders.map((order) => (
               <TableRow
                 key={order.id}
                 sx={{
@@ -166,23 +111,23 @@ const OrdersTab = () => {
                 >
                   #{order.id}
                 </TableCell>
-                <TableCell>{order.userName}</TableCell>
+                <TableCell>{order.user.username}</TableCell>
                 <TableCell sx={{ fontWeight: "medium" }}>
-                  {order.restaurant}
+                  {order.restaurant.name}
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "success.main" }}>
-                  {formatCurrency(order.total)}
+                  {formatCurrency(order.totalPrice)}
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={order.status}
-                    color={getStatusColor(order.status)}
+                    label={order.orderStatus}
+                    color={getStatusColor(order.orderStatus)}
                     variant="outlined"
                     sx={{ fontWeight: "medium", textTransform: "capitalize" }}
                   />
                 </TableCell>
                 <TableCell sx={{ color: "text.secondary" }}>
-                  {formatDate(order.orderDate)}
+                  {formatDate(order.createdAt)}
                 </TableCell>
               </TableRow>
             ))}
@@ -199,7 +144,7 @@ const OrdersTab = () => {
         }}
       >
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Total orders: {mockOrders.length}
+          Total orders: {orders.length}
         </Typography>
         <Typography
           variant="body2"
@@ -207,7 +152,7 @@ const OrdersTab = () => {
         >
           Total revenue:{" "}
           {formatCurrency(
-            mockOrders.reduce((sum, order) => sum + order.total, 0)
+            orders.reduce((sum, order) => sum + order.totalPrice, 0)
           )}
         </Typography>
       </Box>

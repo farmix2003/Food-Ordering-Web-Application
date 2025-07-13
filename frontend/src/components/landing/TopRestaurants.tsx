@@ -41,7 +41,7 @@ const TopRestaurants = () => {
     }
     useEffect(() =>{
      getRestaurants() 
-    })
+    },[])
 
 
   return (

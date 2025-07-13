@@ -2,13 +2,13 @@ package backend.com.eatease.controller;
 
 import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.dto.RestaurantDto;
+import backend.com.eatease.entity.Restaurant;
+import backend.com.eatease.entity.User;
 import backend.com.eatease.service.MenuService;
 import backend.com.eatease.service.RestaurantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,9 +29,20 @@ public class MenuController {
     public ResponseEntity<List<MenuDto>> getAllMenus(){
         return new ResponseEntity<>(menuService.getMenus(), HttpStatus.OK);
     }
+    @GetMapping("/menu/search")
+    public ResponseEntity<List<MenuDto>> searchMenu(@RequestParam("keyword") String keyword) throws Exception {
+        List<MenuDto> menus = menuService.searchFood(keyword);
+        return ResponseEntity.ok().body(menus);
+    }
 
     @GetMapping("/restaurants")
     public ResponseEntity<List<RestaurantDto>> getAllRestaurants() throws Exception {
         return ResponseEntity.ok(restaurantService.getAllRestaurants());
+    }
+    @GetMapping("/restaurants/search")
+    public ResponseEntity<List<RestaurantDto>> searchRestaurants(@RequestParam("keyword") String key
+    ) throws Exception {
+        List<RestaurantDto> restaurants = restaurantService.searchRestaurants(key);
+        return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 }

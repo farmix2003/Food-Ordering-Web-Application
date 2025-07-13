@@ -11,12 +11,12 @@ interface Image{
 }
 
 interface MenuItem {
-  id: string;
+  id: number;
   foodName: string;
   price: number;
   images: Image[];
   description: string;
-  extrasList: { name: string; price: number }[];
+  extrasList: {id:number, name: string; price: number }[];
   available:boolean;
   categoryName:string;
   restaurantId:number;
@@ -26,11 +26,11 @@ interface MenuItem {
 interface MenuItemCardProps {
   item: MenuItem;
   onEdit: (item: MenuItem) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 const MenuItemCard = ({ item, onEdit, onDelete }: MenuItemCardProps) => {
-  console.log("Item: ",item)
+  // console.log("Item: ",item)
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-4">

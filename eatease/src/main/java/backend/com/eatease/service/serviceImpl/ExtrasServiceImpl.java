@@ -57,7 +57,8 @@ public class ExtrasServiceImpl implements ExtrasService {
     @Override
     @Transactional
     public void deleteExtras(Long extraId) {
-       extrasRepository.deleteById(extraId);
+        extrasRepository.deleteFromMenuExtrasList(extraId);
+        extrasRepository.deleteById(extraId);
     }
 
     @Override

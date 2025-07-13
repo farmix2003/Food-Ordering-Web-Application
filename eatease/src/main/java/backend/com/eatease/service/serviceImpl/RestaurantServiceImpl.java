@@ -200,8 +200,12 @@ public class RestaurantServiceImpl implements RestaurantService {
 
 
     @Override
-    public List<Restaurant> searchRestaurants(String keyword) throws Exception {
-        return restaurantRepository.searchRestaurants(keyword);
+    public List<RestaurantDto> searchRestaurants(String keyword) throws Exception {
+        List<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword);
+
+        return  restaurants.stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
     @Override

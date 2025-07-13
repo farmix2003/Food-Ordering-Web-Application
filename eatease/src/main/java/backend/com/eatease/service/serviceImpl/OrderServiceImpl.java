@@ -159,6 +159,15 @@ public class OrderServiceImpl implements OrderService {
         return orders.stream().map(this::mapOrderToDto).toList();
     }
 
+    @Override
+    public List<OrderDto> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+
+        return orders.stream()
+                .map(this::mapOrderToDto)
+                .toList();
+    }
+
     public OrderDto mapOrderToDto(Order order) {
 
             User user = userRepository.findById(order.getCustomer().getId()).orElseThrow();

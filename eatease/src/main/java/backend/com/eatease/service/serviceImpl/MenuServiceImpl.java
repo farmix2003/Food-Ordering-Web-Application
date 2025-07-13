@@ -3,10 +3,7 @@ package backend.com.eatease.service.serviceImpl;
 import backend.com.eatease.dto.ExtrasDto;
 import backend.com.eatease.dto.MenuDto;
 import backend.com.eatease.entity.*;
-import backend.com.eatease.repository.CategoryRepository;
-import backend.com.eatease.repository.ExtrasRepository;
-import backend.com.eatease.repository.ImageRepository;
-import backend.com.eatease.repository.MenuRepository;
+import backend.com.eatease.repository.*;
 import backend.com.eatease.request.FoodRequest;
 import backend.com.eatease.request.UpdateTextBasedMenuItemRequest;
 import backend.com.eatease.response.ImageResponse;
@@ -19,10 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +33,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Autowired
     private ExtrasRepository extrasRepository;
+
+    @Autowired
+    private OrderedFoodRepository orderedFoodRepository;
 
     @Override
     @Transactional
@@ -97,9 +94,12 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public void deleteFood(Long id) throws Exception {
        Menu menu = menuRepository.findById(id).orElseThrow(() -> new RuntimeException("Menu not found with id "+id));
        imageRepository.deleteByMenuId(id);
+       menu.setCategory(null);
+       orderedFoodRepository.deleteByFoodId(id);
        menuRepository.deleteById(menu.getId());
     }
 
@@ -145,7 +145,6 @@ public class MenuServiceImpl implements MenuService {
         menu.setFoodName(req.getFoodName());
         menu.setDescription(req.getDescription());
         menu.setPrice(req.getPrice());
-        menu.setAvailable(req.isAvailable());
 
         if (req.getCategoryId() != null) {
             Category category = categoryRepository.findById(req.getCategoryId())
@@ -196,6 +195,37 @@ public class MenuServiceImpl implements MenuService {
         return menus.stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    @Override
+    public void addImage(Long menuId, MultipartFile file) throws IOException {
+        Menu menu = menuRepository.findById(menuId).orElseThrow();
+
+        if(file == null || file.isEmpty()){
+            throw new IllegalArgumentException("Image file is missing");
+        }
+        Image newImage = new Image();
+        newImage.setRestaurant(null);
+        newImage.setMenu(menu);
+        newImage.setFileName(file.getOriginalFilename());
+        newImage.setData(file.getBytes());
+        newImage.setFileType(file.getContentType());
+        newImage.setCreatedAt(LocalDateTime.now());
+        imageRepository.save(newImage);
+        menu.setImagesList(Collections.singletonList(newImage));
+    }
+
+    @Override
+    public void deleteImages(Long menuId, List<Long> imageIds) {
+      Menu menu = menuRepository.findById(menuId).orElseThrow();
+        if (imageIds == null || imageIds.isEmpty()) {
+            throw new IllegalArgumentException("No image id is provided");
+        }
+        List<Image> imagesToDelete = menu.getImagesList().stream()
+                .filter(image -> image.getMenu().getId().equals(menuId))
+                .toList();
+        imagesToDelete.forEach(image -> image.setMenu(null));
+        imageRepository.deleteAll(imagesToDelete);
     }
 
 }

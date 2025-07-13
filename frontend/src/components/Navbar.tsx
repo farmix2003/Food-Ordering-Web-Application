@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -28,8 +28,6 @@ import {
   Language,
   Home,
   Restaurant,
-  Info,
-  Phone,
 } from "@mui/icons-material";
 import { ListOrdered, LogOutIcon, MenuIcon, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -78,27 +76,31 @@ const Navbar = () => {
   const [isLogoutModelOpen, setIsLogoutModelOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartProps>();
   const [user, setUser] = useState<User | null>(null);
+  const [token,setToken] = useState<string|null>("")
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
-  const token = window.localStorage.getItem("token");
-
+  
+  const getUser = async () => {
+    const data = await getUserByJwt();
+    setUser(data);
+  };
+  
   useEffect(() => {
-    const getUser = async () => {
-      const data = await getUserByJwt();
-      setUser(data);
-    };
+      setToken(window.localStorage.getItem("token"))
     getUser();
   }, []);
 
+  const getUserCart = async () => {
+    if (user) {
+      const data = await getCartByUserId(user.id);
+      setCartItems(data);
+    }
+  };
   useEffect(() => {
-    const getUserCart = async () => {
-      if (user) {
-        const data = await getCartByUserId(user.id);
-        setCartItems(data);
-      }
-    };
     getUserCart();
-  }, [user]);
+  }, []);
+
+  useMemo(() =>{getUserCart()},[])
 
   const getInitials = (fullName?: string) => {
     if (!fullName) return "";
@@ -130,7 +132,10 @@ const Navbar = () => {
     logoutUser();
     window.localStorage.removeItem("token");
     setIsLogoutModelOpen(false);
+    getUser()
+    window.localStorage.removeItem('token')
     navigate("/");
+
   };
 
   const initials = getInitials(user?.username);

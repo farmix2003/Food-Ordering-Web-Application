@@ -14,16 +14,19 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
   People as PeopleIcon,
   Restaurant as RestaurantIcon,
   ShoppingCart as OrdersIcon,
+  ArrowBack,
 } from "@mui/icons-material";
 import UsersTab from "./UsersTab";
 import RestaurantsTab from "./RestaurantsTab";
 import OrdersTab from "./OrdersTab";
+import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -55,6 +58,19 @@ const AdminDashboard = () => {
           Admin Dashboard
         </Typography>
       </Toolbar>
+        <Box sx={{ px: 2, mb: 1 }}>
+      <Button
+        component={Link}
+        to="/home"
+        variant="outlined"
+        color="primary"
+        startIcon={<ArrowBack />}
+        fullWidth
+        sx={{ mb: 2 }}
+      >
+        Back to Home
+      </Button>
+    </Box>
       <Divider />
       <List>
         {menuItems.map((item) => (

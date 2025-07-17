@@ -9,31 +9,32 @@ import {
 } from "@mui/material";
 import { DeliveryDining, AttachMoney, PhoneAndroid } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import type { I18n } from "../../pages/Index";
 
-const features = [
-  {
-    icon: <DeliveryDining sx={{ fontSize: 60 }} />,
-    title: "Fast Delivery",
-    description:
-      "Get your favorite meals delivered to your doorstep in 30 minutes or less.",
-  },
-  {
-    icon: <AttachMoney sx={{ fontSize: 60 }} />,
-    title: "Affordable Prices",
-    description:
-      "Enjoy great food at budget-friendly prices with regular discounts and offers.",
-  },
-  {
-    icon: <PhoneAndroid sx={{ fontSize: 60 }} />,
-    title: "User-Friendly Interface",
-    description:
-      "Intuitive design that makes ordering food simple and enjoyable for everyone.",
-  },
-];
 
-const FeaturesSection = () => {
+const FeaturesSection = ({t}:I18n) => {
   const theme = useTheme();
-
+  
+  const features = [
+    {
+      icon: <DeliveryDining sx={{ fontSize: 60 }} />,
+      title: t("fast"),
+      description:
+        t("deliveryDesc"),
+    },
+    {
+      icon: <AttachMoney sx={{ fontSize: 60 }} />,
+      title: t("price"),
+      description:
+        t("priceDesc"),
+    },
+    {
+      icon: <PhoneAndroid sx={{ fontSize: 60 }} />,
+      title: t("interface"),
+      description:
+        t("interfaceDesc")
+    },
+  ];
   return (
     <Box sx={{ py: 8, backgroundColor: "background.default", px: 0, m: 0 }}>
       <Container maxWidth="lg">
@@ -49,7 +50,7 @@ const FeaturesSection = () => {
             gutterBottom
             sx={{ mb: 6, color: "text.primary" }}
           >
-            Why Choose Eat Ease?
+            {t("why")}
           </Typography>
         </motion.div>
 

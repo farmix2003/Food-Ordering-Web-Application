@@ -28,11 +28,12 @@ interface Restaurant {
 }
 interface RestaurantProps{
   restaurants: Restaurant[]|undefined
+  t:(value:string)=>string
 }
 
 
 
-const TopRestaurantsGrid = ({restaurants}:RestaurantProps) => {
+const TopRestaurantsGrid = ({restaurants, t}:RestaurantProps) => {
 
   const navigate = useNavigate()
 
@@ -101,7 +102,7 @@ const TopRestaurantsGrid = ({restaurants}:RestaurantProps) => {
           onClick={() =>navigate(`/restaurants/${restaurant.id}`, {state: { restaurant: restaurants.find((r) => r.id === restaurant.id)}})}
           disabled={!restaurant.open}
         >
-          View Menu
+          {t("viewMenu")}
         </Button>
       </CardContent>
     </Card>

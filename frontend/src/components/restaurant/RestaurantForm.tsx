@@ -8,6 +8,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import RestaurantImages from "./RestaurantImages";
+import { useTranslation } from "react-i18next";
 
 interface Image{
     id: number;
@@ -50,8 +51,11 @@ interface RestaurantFormProps {
   
 
 const RestaurantForm = ({ restaurant, setRestaurant, setIsOpen, isOpen, onSave,onDelete, handleDeleteImage }: RestaurantFormProps) => {
+  
+  const {t} = useTranslation()
+  
   if (!restaurant) return null;
-
+  
   return (
     <>
     {/* Restaurant Info Section */}
@@ -59,7 +63,7 @@ const RestaurantForm = ({ restaurant, setRestaurant, setIsOpen, isOpen, onSave,o
       <CardHeader>
         <CardTitle className="flex items-center">
           <Edit className="h-5 w-5 mr-2" />
-          Restaurant Information
+          {t("restaurantInfo")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -76,7 +80,7 @@ const RestaurantForm = ({ restaurant, setRestaurant, setIsOpen, isOpen, onSave,o
         </div>
 
         <div>
-<Label htmlFor="image">Upload New Images</Label>
+<Label htmlFor="image">{t("imageUpload")}</Label>
 <Input
 id="image"
 type="file"
@@ -104,7 +108,7 @@ setRestaurant((prev) => prev ? { ...prev, newImages: files } : prev);
 <RestaurantImages restaurant={restaurant} handleDeleteImage={handleDeleteImage} />
 
         <div>
-          <Label htmlFor="cuisine">Cuisine Type</Label>
+          <Label htmlFor="cuisine">{t('cuisineType')}</Label>
           <Input
             id="cuisine"
             value={restaurant.cuisineType}
@@ -122,7 +126,7 @@ cuisineType: e.target.value,
         </div>
 
         <div>
-          <Label htmlFor="streetName">Street Name</Label>
+          <Label htmlFor="streetName">{t('streetName')}</Label>
           <Input
             id="streetName"
             value={restaurant.address.streetName}
@@ -143,7 +147,7 @@ address: {
         </div>
 
         <div>
-          <Label htmlFor="cityName">City Name</Label>
+          <Label htmlFor="cityName">{t('cityName')}</Label>
           <Input
             id="cityName"
             value={restaurant.address.cityName}
@@ -186,7 +190,7 @@ contactInfo: {
         </div>
 
         <div>
-          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <Label htmlFor="phoneNumber">{t('phoneNumber')}</Label>
           <Input
             id="phoneNumber"
             value={restaurant.contactInfo.phone}
@@ -207,7 +211,7 @@ contactInfo: {
         </div>
 
         <div>
-          <Label htmlFor="whatsAppNumber">WhatsApp Number</Label>
+          <Label htmlFor="whatsAppNumber">{t('whatsAppNumber')}</Label>
           <Input
             id="whatsAppNumber"
             value={restaurant.contactInfo.whatsApp}
@@ -249,7 +253,7 @@ contactInfo: {
         </div>
 
         <div>
-          <Label htmlFor="openingHours">Opening Hours</Label>
+          <Label htmlFor="openingHours">{t('openingHours')}</Label>
           <Input
             id="openingHours"
             value={restaurant.openingHours}
@@ -264,7 +268,7 @@ contactInfo: {
         </div>
 
         <div>
-          <Label htmlFor="closingHours">Closing Hours</Label>
+          <Label htmlFor="closingHours">{t('closingHours')}</Label>
           <Input
             id="closingHours"
             value={restaurant.closingHours}
@@ -280,7 +284,7 @@ contactInfo: {
 
 
         <div>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t("resDesc")}</Label>
           <Textarea
             id="description"
             value={restaurant.description}
@@ -301,7 +305,7 @@ onClick={onSave}
 className="w-full text-white bg-orange-600 hover:bg-orange-700"
 >
 <Save className="h-4 w-4 mr-2" />
-Save Restaurant Info
+{t("saveInfo")}
 </Button>
 
 <Button
@@ -310,7 +314,7 @@ onClick={() => setIsOpen(true)}
 className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
 >
 <Trash2 className="h-4 w-4 mr-2" />
-Delete Restaurant
+{t('deleteInfo')}
 </Button>
 </div>
         <Dialog
@@ -319,24 +323,24 @@ Delete Restaurant
         >
           <DialogContent className="sm:max-w-[400px] bg-white text-black">
             <DialogHeader>
-              <DialogTitle>Confirm Deletion</DialogTitle>
+              <DialogTitle>{t('confirmation')}</DialogTitle>
             </DialogHeader>
             <p className="text-sm text-gray-600 mb-4">
-              Are you sure you want to delete this restaurant? This action cannot be undone.
+              {t('confirmationText')}
             </p>
             <DialogFooter>
               <Button
                 variant="outline"
                 onClick={() => setIsOpen(false)}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 variant="destructive"
                 onClick={onDelete}
                 className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
               >
-                Delete Restaurant
+                {"deleteRes"}
               </Button>
             </DialogFooter>
           </DialogContent>

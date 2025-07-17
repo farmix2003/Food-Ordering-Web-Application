@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { getPoplularFoods } from "../../server/server";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { I18n } from "../../pages/Index";
 
 const topFoods = [
   {
@@ -76,7 +77,7 @@ interface MenuItem{
   price:number
 }
 
-const TopFoodsSection = () => {
+const TopFoodsSection = ({t}:I18n) => {
   const theme = useTheme();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const navigate = useNavigate()
@@ -107,7 +108,7 @@ const TopFoodsSection = () => {
             gutterBottom
             sx={{ mb: 6, color: "text.primary" }}
           >
-            🔥 Trending Foods
+            {t("trendingFoods")}
           </Typography>
         </motion.div>
 
@@ -134,9 +135,13 @@ const TopFoodsSection = () => {
               >
                 <CardMedia
                   component="img"
-                  height="200"
                   image={food.images[0].url}
                   alt={food.foodName}
+                   sx={{
+                      height:"15rem",
+                      width:"25rem",
+                      objectFit:"cover"
+                    }}
                 />
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -166,7 +171,7 @@ const TopFoodsSection = () => {
                       sx={{ borderRadius: 2 }}
                       onClick={()=>navigate('/login')}
                     >
-                      Add
+                      {t("addToCart")}
                     </Button>
                   </Box>
                 </CardContent>

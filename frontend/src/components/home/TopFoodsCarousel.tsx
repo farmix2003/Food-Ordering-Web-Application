@@ -6,6 +6,7 @@ import { TopMeals } from "../../constants/TopMeals";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPoplularFoods } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
 // interface CarouselProps {
 //   t: (value: string) => string;
@@ -34,7 +35,7 @@ interface MenuItem{
 }
 
 
-const Carousel = () => {
+const Carousel = ({t}:I18n) => {
 
   const settings = {
     dots: true,
@@ -101,6 +102,7 @@ const Carousel = () => {
       <Slider {...settings}>
         {menuItems.map((item: MenuItem) => (
           <CarouselItems
+            t={t}
             key={item.id}
             foodName={item.foodName}
             image={item.images[0].url}

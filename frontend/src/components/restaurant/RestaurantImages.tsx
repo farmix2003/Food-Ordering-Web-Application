@@ -45,8 +45,7 @@ const RestaurantImages = ({restaurant, handleDeleteImage}:RestaurantImageProps) 
           alt={img.fileName}
           className="w-full h-32 object-cover rounded-lg border"
         />
-        <p className="text-sm text-gray-600 mt-1">{img.fileName}</p>
-
+       
         {/* Delete Icon on Hover */}
         <button
           onClick={() => handleDeleteImage(img.id)}

@@ -20,6 +20,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllRestaurants } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
 interface Image {
   id:number;
@@ -46,7 +47,7 @@ interface Restaurant {
 }
 
 
-const Restaurants = () => {
+const Restaurants = ({t}:I18n) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(
     []
@@ -55,7 +56,6 @@ const Restaurants = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cuisineFilter, setCuisineFilter] = useState("");
-  const [ratingFilter, setRatingFilter] = useState("");
   const navigate = useNavigate();
 
 
@@ -106,7 +106,7 @@ const Restaurants = () => {
     return (
       <Box display="flex" flexDirection="column" alignItems="center" py={8}>
         <CircularProgress color="primary" sx={{ mb: 2 }} />
-        <Typography variant="h6">Loading delicious restaurants...</Typography>
+        <Typography variant="h6">{t('restaurantLoading')}</Typography>
       </Box>
     );
   }
@@ -133,10 +133,10 @@ const Restaurants = () => {
             mb: 2,
           }}
         >
-          All Restaurants
+          {t('allRestaurants')}
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Discover amazing dining experiences near you
+          {t("restaurantsQuote")}
         </Typography>
       </Box>
 
@@ -168,20 +168,6 @@ const Restaurants = () => {
                 {cuisine}
               </MenuItem>
             ))}
-          </Select>
-        </Grid>
-        <Grid>
-          <Select
-            sx={{ width: { sx: 190, sm: 180, md: 240, lg: 306 } }}
-            displayEmpty
-            value={ratingFilter}
-            onChange={(e) => setRatingFilter(e.target.value)}
-          >
-            <MenuItem value="">Any Rating</MenuItem>
-            <MenuItem value="4.5">4.5+ Stars</MenuItem>
-            <MenuItem value="4.0">4.0+ Stars</MenuItem>
-            <MenuItem value="3.5">3.5+ Stars</MenuItem>
-            <MenuItem value="3.0">3.0+ Stars</MenuItem>
           </Select>
         </Grid>
       </Grid>
@@ -278,7 +264,7 @@ const Restaurants = () => {
         if (restaurant.open) handleViewMenu(restaurant.id);
       }}
     >
-      {restaurant.open ? "View Menu" : "Closed"}
+      {restaurant.open ? t("viewMenu") : t("closed")}
     </Button>
   </CardActions>
             </Card>
@@ -293,10 +279,10 @@ const Restaurants = () => {
             🍽️
           </Typography>
           <Typography variant="h5" fontWeight="bold" mb={1}>
-            No restaurants found
+            {t("restaurantNotFound")}
           </Typography>
           <Typography color="text.secondary">
-            Try adjusting your search or filters to find more options
+            {t("searchRestaurants")}
           </Typography>
         </Box>
       )}

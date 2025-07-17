@@ -9,11 +9,13 @@ type CarouselItemProps = {
   image:string;
   restaurantId:number;
   price:number
+  t:(value:string) =>string
 };
 
 
 
 const CarouselItems = ({
+  t,
   image,
   foodName,
   price,
@@ -61,7 +63,7 @@ const CarouselItems = ({
           className="bg-orange-500 hover:bg-orange-600"
           startIcon={<ShoppingCart className="w-4 h-4" />}
         >
-          Add
+          {t("addToCart")}
         </Button>
       </div>
       {/* </Card> */}

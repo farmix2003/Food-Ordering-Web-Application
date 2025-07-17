@@ -17,9 +17,10 @@ import type { SelectChangeEvent } from "@mui/material";
 import { Visibility, VisibilityOff, Restaurant } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-import { registerUser } from "../../server/server";
+import { loginUser, registerUser } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
-const Register = () => {
+const Register = ({t}:I18n) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -92,7 +93,7 @@ const Register = () => {
   };
   const getRoleValue = (role: string) => {
     if (role === "Client") return "ROLE_CUSTOMER";
-    if (role === "Restaurant  Owner") return "ROLE_RESTAURANT_OWNER";
+    if (role === "Restaurant Owner") return "ROLE_RESTAURANT_OWNER";
     return "";
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +125,8 @@ const Register = () => {
         payload.role
       );
   console.log("Registration successful:", response);
-      window.localStorage.setItem("token", response.jwt);
+  const data = await loginUser(payload.email, payload.password);
+      window.localStorage.setItem("token", data.jwt);
   window.localStorage.setItem("token_timestamp", Date.now().toString());
       navigate("/home");
     } catch (error: any) {
@@ -204,7 +206,7 @@ const Register = () => {
             variant="h6"
             sx={{ mb: 3, textAlign: "center" }}
           >
-            Create an Account
+            {t("register")}
           </Typography>
 
           {error && (
@@ -354,7 +356,7 @@ const Register = () => {
               color="secondary"
               sx={{ mb: 3, py: 1.5 }}
             >
-              {loading ? "Creating Account..." : "Register"}
+              {loading ? t("registerLoad"): t("registerBtn")}
             </Button>
 
             <Box textAlign="center">
@@ -370,7 +372,7 @@ const Register = () => {
                   },
                 }}
               >
-                Already have an account? Login
+                {t("registerMessage")}
               </Link>
             </Box>
           </Box>

@@ -5,6 +5,7 @@ import {
   Grid,
   IconButton,
   Divider,
+  ThemeProvider,
 } from "@mui/material";
 import {
   Telegram,
@@ -12,19 +13,24 @@ import {
   LinkedIn,
   Home,
   Info,
-  Phone,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import type { I18n } from "../pages/Index";
+import { useNavigate } from "react-router-dom";
+import { theme } from "../theme/theme";
 
-const Footer = () => {
+const Footer = ({t}:I18n) => {
+  const navigate = useNavigate()
   return (
+    <ThemeProvider theme={theme}>
     <Box
-      sx={{
-        bgcolor: "primary.main",
-        color: "white",
-        py: 6,
-        mt: 8,
-      }}
+    sx={{
+      bgcolor: "primary.main",
+      color: "white",
+      py: 6,
+      mt: 8,
+    }}
+    
     >
       <Container maxWidth="lg">
         <Grid container spacing={4}>
@@ -34,12 +40,12 @@ const Footer = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-            >
+              >
               <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
                 Eat Ease
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Making food delivery simple, fast, and affordable for everyone.
+                {t('footerDesc')}
               </Typography>
             </motion.div>
           </Grid>
@@ -52,21 +58,18 @@ const Footer = () => {
               viewport={{ once: true }}
             >
               <Typography variant="h6" gutterBottom>
-                Quick Links
+                {t("links")}
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Home fontSize="small" />
-                  <Typography variant="body2">Home</Typography>
+                  <Typography variant="body2" className="cursor-pointer">Home</Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Info fontSize="small" />
-                  <Typography variant="body2">About</Typography>
+                  <Typography variant="body2" className="cursor-pointer">About</Typography>
                 </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Phone fontSize="small" />
-                  <Typography variant="body2">Contact</Typography>
-                </Box>
+               
               </Box>
             </motion.div>
           </Grid>
@@ -79,7 +82,7 @@ const Footer = () => {
               viewport={{ once: true }}
             >
               <Typography variant="h6" gutterBottom>
-                Connect With Us
+                {t("connectUs")}
               </Typography>
               <Box sx={{ display: "flex", gap: 1 }}>
                 <IconButton
@@ -104,7 +107,7 @@ const Footer = () => {
                     transition: "all 0.3s ease",
                   }}
                 >
-                  <GitHub />
+                  <GitHub onClick={()=>navigate("")} />
                 </IconButton>
                 <IconButton
                   sx={{
@@ -130,13 +133,14 @@ const Footer = () => {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
           viewport={{ once: true }}
-        >
+          >
           <Typography variant="body2" align="center">
             © 2025 Eat Ease. Built with ❤️ for a university graduation project.
           </Typography>
         </motion.div>
       </Container>
     </Box>
+          </ThemeProvider>
   );
 };
 

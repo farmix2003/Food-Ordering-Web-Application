@@ -25,6 +25,15 @@ public class MenuController {
         this.restaurantService = restaurantService;
     }
 
+    @GetMapping("/menu/{id}")
+    public ResponseEntity<List<MenuDto>> getFoodsByRestaurantId(
+            @PathVariable Long id
+    ) throws Exception {
+        List<MenuDto> menus = menuService.getAllFoods(id);
+        return ResponseEntity.ok().body(menus);
+    }
+
+
 
     @GetMapping("/menu")
     public ResponseEntity<List<MenuDto>> getAllMenus(){

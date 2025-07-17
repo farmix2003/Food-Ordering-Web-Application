@@ -18,6 +18,7 @@ import { Search } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { searchMenu, searchRestaurants } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
 interface ImageResponse {
   id: number;
@@ -51,7 +52,7 @@ interface Restaurant {
   images: ImageResponse[];
 }
 
-const SearchSection = () => {
+const SearchSection = ({t}:I18n) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [menus, setMenus] = useState<MenuDto[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -116,14 +117,14 @@ const SearchSection = () => {
             gutterBottom
             sx={{ mb: 4, color: "text.primary" }}
           >
-            What are you craving today?
+            {t("heroSearchMessage")}
           </Typography>
 
           <Paper elevation={3} sx={{ p: 2, borderRadius: 4, mb: 3 }}>
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Search for dishes, cuisines, or restaurants..."
+              placeholder={t("searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -146,7 +147,7 @@ const SearchSection = () => {
               {menus.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom>
-                    Dishes
+                    {t("dishes")}
                   </Typography>
                   <List>
                     {menus.map((menu) => {
@@ -205,7 +206,7 @@ const SearchSection = () => {
                                     })
                                   }
                                 >
-                                  Go to Restaurant
+                                  {t("goToRestaurant")}
                                 </Button>
                               </Box>
                             }
@@ -224,7 +225,7 @@ const SearchSection = () => {
               {restaurants.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom>
-                    Restaurants
+                    {t("restaurants")}
                   </Typography>
                   <List>
                     {restaurants.map((restaurant) => (
@@ -275,7 +276,7 @@ const SearchSection = () => {
                                   })
                                 }
                                 >
-                                Go to See
+                                {t("goToRestaurant")}
                               </Button>
                                 </Box>
                             </Box>
@@ -289,7 +290,7 @@ const SearchSection = () => {
 
               {menus.length === 0 && restaurants.length === 0 && (
                 <Typography variant="body1" color="text.secondary">
-                  No results found.
+                 {t("noResultFound")}
                 </Typography>
               )}
             </Paper>

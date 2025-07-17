@@ -25,6 +25,7 @@ import {
 import RestaurantManagement from "./RestaurantManagement";
 import OrderManagement from "./OrderManagement";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth = 240;
 
@@ -33,14 +34,14 @@ const RestaurantSidebar = () => {
   const [selectedTab, setSelectedTab] = useState("users");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const {t} = useTranslation()
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { id: "restaurant", label: "Restaurants", icon: <RestaurantIcon /> },
-    { id: "orders", label: "Orders", icon: <OrdersIcon /> },
+    { id: "restaurant", label: t("restaurants"), icon: <RestaurantIcon /> },
+    { id: "orders", label: t("orders"), icon: <OrdersIcon /> },
   ];
 
   const drawer = (
@@ -52,7 +53,7 @@ const RestaurantSidebar = () => {
           component="div"
           sx={{ fontWeight: "bold" }}
         >
-          Restaurant Dashboard
+          {t("restaurantDashboard")}
         </Typography>
       </Toolbar>
        <Box sx={{ px: 2, mb: 1 }}>
@@ -65,7 +66,7 @@ const RestaurantSidebar = () => {
         fullWidth
         sx={{ mb: 2 }}
       >
-        Back to Home
+        {t('backHome')}
       </Button>
     </Box>
       <Divider />
@@ -136,7 +137,7 @@ const RestaurantSidebar = () => {
           </IconButton>
           <Typography variant="h6" noWrap component="div">
             {menuItems.find((item) => item.id === selectedTab)?.label ||
-              "Dashboard"}
+              t("dashboard")}
           </Typography>
         </Toolbar>
       </AppBar>

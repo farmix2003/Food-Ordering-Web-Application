@@ -9,32 +9,33 @@ import {
 } from "@mui/material";
 import { Restaurant, ShoppingCart, LocalDining } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import type { I18n } from "../../pages/Index";
 
-const steps = [
-  {
-    icon: <Restaurant sx={{ fontSize: 40 }} />,
-    title: "Browse Menus",
-    description:
-      "Explore a wide variety of restaurants and dishes available in your area.",
-    step: "01",
-  },
-  {
-    icon: <ShoppingCart sx={{ fontSize: 40 }} />,
-    title: "Place Your Order",
-    description:
-      "Select your favorite items, customize them, and proceed to checkout.",
-    step: "02",
-  },
-  {
-    icon: <LocalDining sx={{ fontSize: 40 }} />,
-    title: "Enjoy Your Meal",
-    description:
-      "Sit back and relax while we deliver your delicious meal to your door.",
-    step: "03",
-  },
-];
 
-const HowItWorksSection = () => {
+const HowItWorksSection = ({t}:I18n) => {
+  const steps = [
+    {
+      icon: <Restaurant sx={{ fontSize: 40 }} />,
+      title: t("menuTitle"),
+      description:
+        t("menuDesc"),
+      step: "01",
+    },
+    {
+      icon: <ShoppingCart sx={{ fontSize: 40 }} />,
+      title: t("shopping"),
+      description:
+       t("shoppingDesc"),
+      step: "02",
+    },
+    {
+      icon: <LocalDining sx={{ fontSize: 40 }} />,
+      title: t("enjoy"),
+      description:
+        t("enjoyDesc"),
+      step: "03",
+    },
+  ];
   return (
     <Box sx={{ py: 8, backgroundColor: "white" }}>
       <Container maxWidth="lg">
@@ -50,7 +51,7 @@ const HowItWorksSection = () => {
             gutterBottom
             sx={{ mb: 6, color: "text.primary" }}
           >
-            How It Works
+            {t("howItWorks")}
           </Typography>
         </motion.div>
         <Grid container spacing={4}>

@@ -47,6 +47,7 @@ import {
   getUserByJwt,
   removeAddress,
 } from "../../server/server";
+import { t } from "i18next";
 
 interface Address {
   id: number;
@@ -115,31 +116,6 @@ const UserOverview = () => {
       apartment: address.apartment,
     });
     setAddressModalOpen(true);
-
-    const data = editUserAddress(
-      address.id,
-      addressForm.streetName,
-      addressForm.apartment,
-      addressForm.cityName
-    );
-    data
-      .then(() => {
-        toast({
-          title: "Address Updated",
-          description: "The address has been successfully updated.",
-        });
-        setAddressModalOpen(false);
-        setEditingAddress(null);
-        getUser();
-      })
-      .catch((error) => {
-        console.error("Error updating address:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update address. Please try again.",
-          variant: "destructive",
-        });
-      });
   };
 
   const handleDeleteAddress = (addressId: number) => {
@@ -204,7 +180,8 @@ const UserOverview = () => {
         `Updating address with ID: ${editingAddress.id}`,
         addressForm
       );
-      handleEditAddress(editingAddress);
+     const data = editUserAddress(editingAddress.id, addressForm.streetName, addressForm.apartment, addressForm.cityName);
+     console.log(data)
     } else {
       console.log("Creating new address:", addressForm);
       handleSaveAddAddress();
@@ -229,12 +206,12 @@ const UserOverview = () => {
             className="mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            {t("backHome")}
           </Button>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            User Profile Overview
+            {t('userOverview')}
           </h1>
-          <p className="text-gray-600">Manage user information and addresses</p>
+          <p className="text-gray-600">{t('userManagementText')}</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -287,7 +264,7 @@ const UserOverview = () => {
                   variant={"outline"}
                 >
                   <Edit className="mr-2 w-4 h-4" />
-                  Edit Profile
+                  {t('editProfile')}
                 </Button>
               </CardContent>
             </Card>
@@ -301,9 +278,9 @@ const UserOverview = () => {
                   <div>
                     <CardTitle className="flex items-center text-2xl">
                       <MapPin className="mr-2 w-6 h-6" />
-                      Addresses ({user?.addressList.length})
+                      {t("addresses",{number:user?.addressList.length})}
                     </CardTitle>
-                    <CardDescription>Manage user addresses</CardDescription>
+                    <CardDescription>{t('addressManagement')}</CardDescription>
                   </div>
                   <Button
                     variant={"outline"}
@@ -312,7 +289,7 @@ const UserOverview = () => {
                     className="flex items-center text-white bg-blue-950 hover:text-white"
                   >
                     <Plus className="mr-2 w-4 h-4" />
-                    Add Address
+                    {t('addAddress')}
                   </Button>
                 </div>
               </CardHeader>
@@ -366,17 +343,17 @@ const UserOverview = () => {
           <DialogContent className="sm:max-w-[500px] bg-white hover:bg-white">
             <DialogHeader>
               <DialogTitle>
-                {editingAddress ? "Edit Address" : "Add New Address"}
+                {editingAddress ? t('editAddress') : t('addAddress')}
               </DialogTitle>
               <DialogDescription>
                 {editingAddress
-                  ? "Update the address details below."
-                  : "Enter the new address details below."}
+                  ? t("editAddressDesc")
+                  : t('addAddressDesc')}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="street">Street Address</Label>
+                <Label htmlFor="street">{t('streetName')}</Label>
                 <Input
                   id="street"
                   value={addressForm.streetName}
@@ -391,7 +368,7 @@ const UserOverview = () => {
               </div>
               <div className="grid gap-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="city">{t('cityName')}</Label>
                   <Input
                     id="city"
                     value={addressForm.cityName}
@@ -431,7 +408,7 @@ const UserOverview = () => {
                 variant={"outline"}
                 className="bg-green-700 text-white border-green-700"
               >
-                {editingAddress ? "Update Address" : "Save Address"}
+                {editingAddress ? t('updateAddress') : t('saveAddress')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -441,19 +418,18 @@ const UserOverview = () => {
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Address Deletion</AlertDialogTitle>
+              <AlertDialogTitle>{t('confirmAddressDeletion')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this address? This action cannot
-                be undone.
+                {t('deleteAddressConfirmDesc')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDeleteAddress}
                 className="bg-red-600 hover:bg-red-700"
               >
-                Delete Address
+                {t("deleteAddress")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

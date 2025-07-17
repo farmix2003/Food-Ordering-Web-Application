@@ -338,7 +338,7 @@ const addMenuItem = async (
 }
 
 const getMenuItemsByRestaurantId = async (restaurantId: number) => {
-  const response = await axios.get(`/admin/menu/${restaurantId}`, {
+  const response = await axios.get(`/all/menu/${restaurantId}`, {
     headers: {
       Authorization: `Bearer ${window.localStorage.getItem("token")}`,
     },

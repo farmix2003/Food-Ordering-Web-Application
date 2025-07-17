@@ -47,15 +47,6 @@ public class MenuAdminController {
         return ResponseEntity.ok().body(msg);
     }
 
-    @GetMapping("/menu/{id}")
-    public ResponseEntity<List<MenuDto>> getFoodsByRestaurantId(
-            @PathVariable Long id
-    ) throws Exception {
-        List<MenuDto> menus = menuService.getAllFoods(id);
-        return ResponseEntity.ok().body(menus);
-    }
-
-
 
     @PutMapping("/status/{id}")
     public ResponseEntity<Menu> updateAvailableStatus(@RequestHeader("Authorization")String jwt,

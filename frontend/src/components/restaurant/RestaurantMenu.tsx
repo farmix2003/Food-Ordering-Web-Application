@@ -5,6 +5,7 @@ import {
   Instagram,
   WhatsApp,
   Star,
+  CurrencyLira,
 } from "@mui/icons-material";
 import {
   Box,
@@ -17,6 +18,7 @@ import { useState, useEffect, use } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { addItemToCart, getMenuItemsByRestaurantId, getUserByJwt } from "../../server/server";
 import { Phone } from "lucide-react";
+import type { I18n } from "../../pages/Index";
 
 interface Image {
   id: number;
@@ -62,7 +64,7 @@ interface User{
   id:number
 }
 
-const RestaurantMenu = () => {
+const RestaurantMenu = ({t}:I18n) => {
   const { id } = useParams();
   const location = useLocation();
   const restaurant1 = location.state?.restaurant;
@@ -230,7 +232,7 @@ const RestaurantMenu = () => {
                             checked={selectedExtrasMap[item.id]?.some((e) => e.name === extra.name) || false}
                             onChange={() => handleExtraToggle(item.id, extra)}
                           />
-                          {extra.name} <span className="text-orange-600">+${extra.price.toFixed(2)}</span>
+                          {extra.name} <span className="text-orange-600">+<CurrencyLira />{extra.price.toFixed(2)}</span>
                         </label>
                       ))}
                     </div>
@@ -239,7 +241,7 @@ const RestaurantMenu = () => {
 
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-orange-600">
-                    ${item.price.toFixed(2)}
+                   <CurrencyLira /> {item.price.toFixed(2)}
                   </span>
                   <Button
                     size="small"
@@ -275,7 +277,7 @@ const RestaurantMenu = () => {
                     }}
                   >
                     <Add className="w-4 h-4 mr-1" />
-                    Add to Cart
+                    {t("addToCart")}
                   </Button>
                 </div>
               </CardContent>

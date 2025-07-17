@@ -8,8 +8,9 @@ import {
   CardContent,
 } from "@mui/material";
 import { motion } from "framer-motion";
+import type { I18n } from "../../pages/Index";
 
-const AboutSection = () => {
+const AboutSection = ({t}:I18n) => {
   return (
     <Box sx={{ py: 8, backgroundColor: "background.default" }}>
       <Container maxWidth="lg">
@@ -26,7 +27,7 @@ const AboutSection = () => {
                 gutterBottom
                 sx={{ color: "text.primary" }}
               >
-                About Eat Ease
+                {t("aboutUs")}
               </Typography>
               <Typography
                 variant="body1"
@@ -37,10 +38,7 @@ const AboutSection = () => {
                   color: "text.secondary",
                 }}
               >
-                Eat Ease is a food delivery web app built for convenience and
-                speed. Developed using Java Spring Boot (backend) and React +
-                TypeScript (frontend), it helps users order from local
-                restaurants effortlessly.
+                {t("goal")}
               </Typography>
               <Typography
                 variant="body1"
@@ -51,9 +49,7 @@ const AboutSection = () => {
                   color: "text.secondary",
                 }}
               >
-                Our platform connects hungry customers with their favorite local
-                restaurants, making food ordering simple, fast, and enjoyable
-                for busy students and families.
+                {t("aim")}
               </Typography>
               <Card
                 sx={{
@@ -65,12 +61,10 @@ const AboutSection = () => {
               >
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    🎓 Final Year Graduation Project
+                    {t('gp')}
                   </Typography>
                   <Typography variant="body2">
-                    This project represents the culmination of years of learning
-                    in software development, combining modern web technologies
-                    to solve real-world problems.
+                    {t("myDesc")}
                   </Typography>
                 </CardContent>
               </Card>

@@ -1,5 +1,4 @@
 import SearchSection from "../components/landing/SearchSection";
-import OrderAgain from "../components/home/OrderAgain";
 import Carousel from "../components/home/TopFoodsCarousel";
 import TopRestaurantsGrid from "../components/home/TopRestaurantsCarousel";
 import "./../App.css";
@@ -7,6 +6,8 @@ import { useEffect, useState } from "react";
 import { getAllRestaurants } from "../server/server";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
+import type { I18n } from "./Index";
+import Footer from "../components/Footer";
 
 interface Image {
   id:number;
@@ -31,7 +32,7 @@ interface RestaurantProps {
   orders: Order[]
 }
 
-const HomePage = () => {
+const HomePage = ({t}:I18n) => {
   const [restaurants, setRestaurants] = useState<RestaurantProps[]>([])
   const navigate = useNavigate()
   const getRestaurants = async() =>{
@@ -49,42 +50,43 @@ const HomePage = () => {
         {/* Header */}
         <div className="mb-8 zz">
           <h1 className="text-4xl font-bold text-gray-200 mb-2">
-            Welcome to Eat Ease
+            {t("welcome")}
           </h1>
           <p className="text-xl text-gray-300 font-semibold ">
-            Discover delicious meals from your favorite restaurants
+            {t('homeDesc')}
           </p>
         </div>
 
         {/* Search Bar */}
         <div className="mb-8 zz">
-          <SearchSection />
+          <SearchSection t={t} />
         </div>
         <div className="black-cover"></div>
         {/* Top Food Carousel */}
         <div className="mb-12 mt-[300px]">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Popular Dishes
+            {t("popularDishes")}
           </h2>
-          <Carousel />
+          <Carousel t={t} />
         </div>
 
         {/* Top Restaurants Grid */}
         <div className="mb-12">
 
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Top Restaurants
+            {t("topRestaurants")}
           </h2>
-          <TopRestaurantsGrid restaurants={restaurants} />
-          <Button variant={"link"}onClick={() => navigate("/restaurants")} className="font-bold text-amber-700 text-2xl hover:text-amber-800" >Explore All</Button>
+          <TopRestaurantsGrid restaurants={restaurants} t={t} />
+          <Button variant={"link"}onClick={() => navigate("/restaurants")} className="mt-4 font-bold text-amber-700 text-2xl hover:text-amber-800" >Explore All</Button>
         </div>
 
         {/* Order Again Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Again</h2>
-          <OrderAgain />
+          {/* <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("orderAgain")}</h2>
+          <OrderAgain t={t} /> */}
         </div>
       </div>
+          <Footer t={t} />
     </div>
   );
 };

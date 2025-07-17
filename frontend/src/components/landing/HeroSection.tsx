@@ -8,8 +8,9 @@ import {
 } from "@mui/material";
 import { Grid } from "@mui/material";
 import { motion } from "framer-motion";
+import type { I18n } from "../../pages/Index";
 
-const HeroSection = () => {
+const HeroSection = ({t}:I18n) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -45,7 +46,7 @@ const HeroSection = () => {
                   fontSize: { xs: "2.5rem", md: "3.5rem" },
                 }}
               >
-                Get Your Favorite Meals Delivered – Fast, Fresh, Easy.
+             {   t("welcome")}
               </Typography>
               <Typography
                 variant="h5"
@@ -56,7 +57,7 @@ const HeroSection = () => {
                   textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                 }}
               >
-                Order from top restaurants around you with just a few clicks.
+                {t("heroQuote")}
               </Typography>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -72,7 +73,7 @@ const HeroSection = () => {
                     borderRadius: 3,
                   }}
                 >
-                  Order Now
+                  {t("order")}
                 </Button>
               </motion.div>
             </motion.div>

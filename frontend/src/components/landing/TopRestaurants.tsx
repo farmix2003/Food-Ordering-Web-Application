@@ -14,6 +14,7 @@ import {
 import { Restaurant } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { getRestaurantForlandingPage } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
 interface Image{
   id:number;
@@ -29,7 +30,7 @@ interface Restaurant {
   cuisineType:string
 }
 
-const TopRestaurants = () => {
+const TopRestaurants = ({t}:I18n) => {
 
   const [restaurants, setRestuarants] = useState<Restaurant[]>([])
 
@@ -59,7 +60,7 @@ const TopRestaurants = () => {
             gutterBottom
             sx={{ mb: 6, color: "text.primary" }}
           >
-            🏆 Top Restaurants
+          {t("topRestaurants")}
           </Typography>
         </motion.div>
 
@@ -127,7 +128,7 @@ const TopRestaurants = () => {
                       startIcon={<Restaurant />}
                       sx={{ borderRadius: 2 }}
                     >
-                      View Menu
+                      {t("viewMenu")}
                     </Button>
                   </CardContent>
                 </Card>

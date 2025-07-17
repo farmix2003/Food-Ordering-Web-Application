@@ -15,6 +15,7 @@ import {
 import { AddShoppingCart } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { getMenusForLandingPage } from "../../server/server";
+import type { I18n } from "../../pages/Index";
 
 interface Image {
   id:number;
@@ -137,7 +138,7 @@ const menuItems = {
   ],
 };
 
-const MenuSection = () => {
+const MenuSection = ({t}:I18n) => {
   const [selectedCategory, setSelectedCategory] = useState(0);
  const [menus, setMenus] = useState<Menu[]>([])
  
@@ -182,7 +183,7 @@ console.log("Menus",menus)
             gutterBottom
             sx={{ mb: 6, color: "text.primary" }}
           >
-            🍱 Explore Our Menu
+            {t("exploreMenu")}
           </Typography>
         </motion.div>
 
@@ -268,7 +269,7 @@ console.log("Menus",menus)
                         startIcon={<AddShoppingCart />}
                         sx={{ borderRadius: 2 }}
                       >
-                        Add
+                       {t("addToCart")}
                       </Button>
                     </Box>
                   </CardContent>

@@ -24,6 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Box } from "@mui/material";
 import { CurrencyLira } from "@mui/icons-material";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Image {
   id: number;
@@ -73,7 +74,7 @@ const Cart = () => {
   const [address, setAddress] = useState<User>();
   const { id } = useParams();
   const navigate = useNavigate();
-
+ const {t} = useTranslation()
   const getUserAddress = async () => {
     const data = await getUserByJwt();
     setAddress(data);
@@ -167,16 +168,16 @@ const Cart = () => {
               <Store className="w-12 h-12 text-gray-400" />
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Your cart is empty
+              {t("cartEmpty")}
             </h2>
             <p className="text-gray-600 mb-8">
-              Add some delicious items to get started!
+              {t("addFoodToCart")}
             </p>
             <Button
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg"
               onClick={() => navigate("/restaurants")}
             >
-              Browse Menu
+              {t('browseMenu')}
             </Button>
           </div>
         </div>
@@ -188,7 +189,7 @@ const Cart = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Cart</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('yourCart')}</h1>
           <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
             <div className="flex items-center text-gray-600">
               <MapPin className="w-5 h-5 mr-2" />
@@ -201,7 +202,7 @@ const Cart = () => {
               className="text-blue-600 border-blue-200 hover:bg-blue-50"
             >
               <Edit className="w-4 h-4 mr-1" />
-              Change
+              {t('change')}
             </Button>
           </div>
         </div>
@@ -210,14 +211,14 @@ const Cart = () => {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between">
-                <CardTitle className="text-xl font-semibold">Order Items</CardTitle>
+                <CardTitle className="text-xl font-semibold">{t('orderItems')}</CardTitle>
                 <Button
                   variant={"destructive"}
                   size="sm"
                   className="bg-red-500 text-white hover:bg-red-600 text-2xl"
                   onClick={handleClearCart}
                 >
-                  Clear Cart
+                  {t('clearCart')}
                 </Button>
               </CardHeader>
 
@@ -286,17 +287,17 @@ const Cart = () => {
           <div className="lg:col-span-1">
             <Card className="sticky top-8">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">Order Summary</CardTitle>
+                <CardTitle className="text-xl font-semibold">{t('orderSummary')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">
-                    Subtotal ({cartItems.items.length} items)
+                    {t("subtotal",{subtotal: cartItems.items.length})}
                   </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-semibold">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span>
                     <CurrencyLira /> {cartItems.total.toFixed(2)}
                   </span>
@@ -304,11 +305,8 @@ const Cart = () => {
                 <Button
                 onClick={handleCreateOrder}
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-medium rounded-lg mt-6">
-                  Place Order
+                  {t("placeOrder")}
                 </Button>
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  By placing your order, you agree to our Terms of Service and Privacy Policy.
-                </p>
               </CardContent>
             </Card>
           </div>

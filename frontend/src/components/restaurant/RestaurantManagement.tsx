@@ -25,6 +25,7 @@ import {
 } from "../../server/server";
 import AddNewRestaurantModal from "./AddNewRestaurantModal";
 import RestaurantForm from "./RestaurantForm";
+import { useTranslation } from "react-i18next";
 
 interface Image {
   id: number;
@@ -75,6 +76,7 @@ interface NewMenuItem {
   extrasIds: number[];
 }
 
+
 const RestaurantManagement = () => {
   const [restaurant, setRestaurant] = useState<Restaurant & { newImages?: File[] } | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -84,7 +86,7 @@ const RestaurantManagement = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [extras, setExtras] = useState<{ id: number; name: string }[]>([]);
   const [categories, setCategories] = useState<{ id: number; categoryName: string }[]>([]);
-
+  const {t} = useTranslation()
   const [newRestaurant, setNewRestaurant] = useState({
     name: "",
     description: "",
@@ -133,10 +135,6 @@ const RestaurantManagement = () => {
     try {
       await deleteRestaurant(restaurant.id);
       setRestaurant(null);
-      toast({
-        title: "Restaurant Deleted",
-        description: "The restaurant has been deleted successfully.",
-      });
       setIsDeleteConfirmOpen(false);
     } catch (error) {
       toast({
@@ -546,7 +544,7 @@ const RestaurantManagement = () => {
           <Card className="shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center">Menu Items ({menuItems.length})</CardTitle>
+                <CardTitle className="flex items-center">{t("menuItems",{length:menuItems.length})}</CardTitle>
                 <Button
                   onClick={() => {
                     setEditingItem(null);
@@ -555,7 +553,7 @@ const RestaurantManagement = () => {
                   className="bg-green-600 text-white hover:bg-green-700"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Item
+                  {t("addItem")}
                 </Button>
               </div>
             </CardHeader>
@@ -571,7 +569,7 @@ const RestaurantManagement = () => {
                 ))}
                 {menuItems.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    No menu items yet. Add your first item to get started!
+                    {t("noItemFound")}
                   </div>
                 )}
               </div>

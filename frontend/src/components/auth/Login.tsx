@@ -16,8 +16,9 @@ import {
 import { Visibility, VisibilityOff, Restaurant } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../server/server.ts";
+import type { I18n } from "../../pages/Index.tsx";
 
-const Login = () => {
+const Login = ({t}:I18n) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -49,7 +50,7 @@ const Login = () => {
 
       // Redirect to home page
       navigate("/home");
-    } catch (error: string) {
+    } catch (error:any) {
       console.error("Login failed:", error);
       setError(
         error.response?.data?.message || "Login failed. Please try again."
@@ -109,7 +110,7 @@ const Login = () => {
             variant="h6"
             sx={{ mb: 3, textAlign: "center" }}
           >
-            Login to Eat Ease
+            {t("login")}
           </Typography>
 
           {error && (
@@ -181,7 +182,7 @@ const Login = () => {
               disabled={loading}
               sx={{ mb: 3, py: 1.5 }}
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? t("loginLoad") : t("loginBtn")}
             </Button>
 
             <Box textAlign="center">
@@ -197,7 +198,7 @@ const Login = () => {
                   },
                 }}
               >
-                Don't have an account? Register
+                {t("loginMessage")}
               </Link>
             </Box>
           </Box>

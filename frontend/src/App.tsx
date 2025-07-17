@@ -17,15 +17,23 @@ import Cart from "./pages/CartPage";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import PrivateRoute from "./pages/routes/PrivateRoute";
 import PublicRoute from "./pages/routes/PublicRoute";
-import Footer from "./components/Footer";
 import { useEffect } from "react";
 import { checkTokenExpiry } from "./server/server";
 import RestaurantSidebar from "./components/restaurant/RestaurantSidebar";
 import Orders from "./components/user/Orders";
+import { useTranslation } from "react-i18next";
 
 const queryClient = new QueryClient();
 
+
 const App = () => {
+
+  const {t, i18n} = useTranslation()
+
+  const languages =[
+    {code:"en", name:"En"},
+    {code:"tr", name:"Tr"}
+  ]
 
 
   useEffect(() => {
@@ -35,28 +43,28 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <Navbar />
+          <Navbar i18n={i18n} languages={languages} />
           <Routes>
-            <Route path="/" element={<PublicRoute element={<Index />} />} />
+            <Route path="/" element={<PublicRoute element={<Index t={t} />} />} />
             <Route
               path="/login"
-              element={<PublicRoute element={<Login />} />}
+              element={<PublicRoute element={<Login t={t} />} />}
             />
             <Route
               path="/register"
-              element={<PublicRoute element={<Register />} />}
+              element={<PublicRoute element={<Register t={t} />} />}
             />
             <Route
               path="/home"
-              element={<PrivateRoute element={<HomePage />} />}
+              element={<PrivateRoute element={<HomePage t={t} />} />}
             />
             <Route
               path="/restaurants"
-              element={<PrivateRoute element={<Restaurants />} />}
+              element={<PrivateRoute element={<Restaurants t={t} />} />}
             />
             <Route
               path="/restaurants/:id"
-              element={<PrivateRoute element={<RestaurantMenu />} />}
+              element={<PrivateRoute element={<RestaurantMenu t={t} />} />}
             />
             <Route
               path="/owner/restaurant"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -21,6 +21,7 @@ import {
   Avatar,
   Modal,
   Menu,
+  type SelectChangeEvent,
 } from "@mui/material";
 import {
   Search,
@@ -32,6 +33,7 @@ import {
 import { ListOrdered, LogOutIcon, MenuIcon, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCartByUserId, getUserByJwt, logoutUser } from "../server/server";
+import type { i18n } from "i18next";
 
 type User = {
   id: number;
@@ -39,6 +41,14 @@ type User = {
   role: string;
 };
 
+interface Language {
+  code:string;
+  name:string
+}
+interface I18n{
+  i18n:i18n
+  languages:Language[]
+}
 interface Image {
   id: number;
   fileName: string;
@@ -67,10 +77,9 @@ interface CartProps {
   total: number;
 }
 
-const Navbar = () => {
+const Navbar:React.FC<I18n> = ({i18n, languages}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [language, setLanguage] = useState("EN");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isLogoutModelOpen, setIsLogoutModelOpen] = useState(false);
@@ -84,9 +93,15 @@ const Navbar = () => {
     setUser(data);
   };
   
+
+  const handleLanguageChange = (event:SelectChangeEvent<string>) =>{
+    const selectedLanguage = event.target.value;
+    i18n.changeLanguage(selectedLanguage)
+  }
+
   useEffect(() => {
     getUser();
-  }, []);
+  }, [token]);
 
   const getUserCart = async () => {
     if (user) {
@@ -178,14 +193,14 @@ const Navbar = () => {
                 <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
                   <Language sx={{ mr: 1 }} />
                   <Select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
+                    value={i18n.language}
+                    onChange={handleLanguageChange}
                     size="small"
                     sx={{ minWidth: 70 }}
-                  >
-                    <MenuItem value="EN">EN</MenuItem>
-                    <MenuItem value="RU">RU</MenuItem>
-                    <MenuItem value="UZ">UZ</MenuItem>
+                    >
+                  {languages.map((lang,i)=>(
+                    <MenuItem key={i} value={lang.code}>{lang.name}</MenuItem>
+                  ))}
                   </Select>
                 </Box>
 

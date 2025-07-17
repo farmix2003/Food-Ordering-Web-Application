@@ -15,6 +15,7 @@ import { Restaurant } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { getRestaurantForlandingPage } from "../../server/server";
 import type { I18n } from "../../pages/Index";
+import { useNavigate } from "react-router-dom";
 
 interface Image{
   id:number;
@@ -33,8 +34,9 @@ interface Restaurant {
 const TopRestaurants = ({t}:I18n) => {
 
   const [restaurants, setRestuarants] = useState<Restaurant[]>([])
+  const navigate = useNavigate()
 
-
+  
     const getRestaurants = async() =>{
       const data = await getRestaurantForlandingPage()
       console.log(data)
@@ -86,12 +88,11 @@ const TopRestaurants = ({t}:I18n) => {
                   <CardMedia
                     component="img"
                     height="200"
-                    width={"25rem"}
                     image={restaurant.images[0].url}
                     alt={restaurant.name}
                     sx={{
                       height:200,
-                      width:"25rem",
+                      width:"22rem",
                       objectFit:"cover"
                     }}
                   />
@@ -123,6 +124,7 @@ const TopRestaurants = ({t}:I18n) => {
                     </Box>
 
                     <Button
+                    onClick={()=> navigate("/login")}
                       variant="contained"
                       fullWidth
                       startIcon={<Restaurant />}

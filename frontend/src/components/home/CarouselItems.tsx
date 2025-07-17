@@ -1,9 +1,16 @@
 import { ShoppingCart } from "@mui/icons-material";
 import { Button, Card } from "@mui/material";
-import { getRestaurantById } from "../../server/server";
+import { addItemToCart, getRestaurantById, getUserByJwt } from "../../server/server";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+interface User {
+  id:number
+}
 
 type CarouselItemProps = {
+  id:number
   available:boolean;
   foodName:string;
   image:string;
@@ -15,6 +22,7 @@ type CarouselItemProps = {
 
 
 const CarouselItems = ({
+  id,
   t,
   image,
   foodName,
@@ -23,12 +31,20 @@ const CarouselItems = ({
 }: CarouselItemProps) => {
 
   const [restaurant, setRestaurant] = useState<string>()
+  const [user, setUser] = useState<User>()
+  const navigate = useNavigate()
   const getRestaurant = async() =>{
     const response = await getRestaurantById(restaurantId)
     setRestaurant(response.name)
   }
 
+  const getUser = async() =>{
+    const data = await getUserByJwt()
+    setUser(data)
+  }
+
   useEffect(()=>{
+    getUser()
     getRestaurant()
   },[])
 
@@ -52,7 +68,21 @@ const CarouselItems = ({
       <div className="w-full p-1 flex items-center justify-between">
         <span className="text-xl font-bold text-orange-600">{price}</span>
         <Button
-          // onClick={() => handleAddToCart(item)}
+          onClick={async() => {
+            try {
+                        await addItemToCart({
+                          foodId: id,
+                          quantity: 1,
+                          extrasIds: []
+                        })
+                        if(user) {
+                          navigate(`/user/cart/${user.id}`);
+                        }
+          }catch(e){
+            console.error("Error while adding item to cart. ",e)
+          }
+        }
+        }
           size="medium"
           variant="contained"
           sx={{

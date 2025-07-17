@@ -9,8 +9,10 @@ import {
 import { Grid } from "@mui/material";
 import { motion } from "framer-motion";
 import type { I18n } from "../../pages/Index";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = ({t}:I18n) => {
+  const navigate = useNavigate()
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -64,6 +66,7 @@ const HeroSection = ({t}:I18n) => {
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
+                onClick={()=>navigate("/login")}
                   variant="contained"
                   size="large"
                   sx={{

@@ -16,6 +16,7 @@ import { AddShoppingCart } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { getMenusForLandingPage } from "../../server/server";
 import type { I18n } from "../../pages/Index";
+import { useNavigate } from "react-router-dom";
 
 interface Image {
   id:number;
@@ -140,9 +141,9 @@ const menuItems = {
 
 const MenuSection = ({t}:I18n) => {
   const [selectedCategory, setSelectedCategory] = useState(0);
- const [menus, setMenus] = useState<Menu[]>([])
- 
- const getMenus = async() =>{
+  const [menus, setMenus] = useState<Menu[]>([])
+  const navigate = useNavigate()
+  const getMenus = async() =>{
   const data = await getMenusForLandingPage();
   console.log(data)
   setMenus(data)
@@ -264,6 +265,7 @@ console.log("Menus",menus)
                         {item.price}
                       </Typography>
                       <Button
+                      onClick={() => navigate("/login")}
                         variant="contained"
                         size="small"
                         startIcon={<AddShoppingCart />}

@@ -40,7 +40,7 @@ interface Image{
   
 
 interface RestaurantFormProps {
-    restaurant: Restaurant & { newImages?: File[] };
+    restaurant: Restaurant & { newImages?: File[] }|null;
     setRestaurant: React.Dispatch<React.SetStateAction<Restaurant & { newImages?: File[] } | null>>;
     onSave: () => Promise<void>;
     onDelete: () => void;

@@ -2,22 +2,21 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import CarouselItems from "./CarouselItems";
-import { TopMeals } from "../../constants/TopMeals";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { getPoplularFoods } from "../../server/server";
 import type { I18n } from "../../pages/Index";
 
 // interface CarouselProps {
 //   t: (value: string) => string;
 // }
-type CarouselItemProps = {
-  id: number;
-  image: string;
-  name: string;
-  price?: string;
-  restaurant?: string;
-};
+// type CarouselItemProps = {
+//   id: number;
+//   image: string;
+//   name: string;
+//   price?: string;
+//   restaurant?: string;
+// };
 
 interface Image {
   id:number;
@@ -84,7 +83,7 @@ const Carousel = ({t}:I18n) => {
   };
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
   
     const getPopularMenuItems = async() =>{
        const data = await getPoplularFoods()
@@ -102,6 +101,7 @@ const Carousel = ({t}:I18n) => {
       <Slider {...settings}>
         {menuItems.map((item: MenuItem) => (
           <CarouselItems
+            id={item.id}
             t={t}
             key={item.id}
             foodName={item.foodName}

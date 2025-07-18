@@ -27,6 +27,7 @@ import UsersTab from "./UsersTab";
 import RestaurantsTab from "./RestaurantsTab";
 import OrdersTab from "./OrdersTab";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth = 240;
 
@@ -35,15 +36,15 @@ const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("users");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const {t} = useTranslation()
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { id: "users", label: "Users", icon: <PeopleIcon /> },
-    { id: "restaurants", label: "Restaurants", icon: <RestaurantIcon /> },
-    { id: "orders", label: "Orders", icon: <OrdersIcon /> },
+    { id: "users", label: t('users'), icon: <PeopleIcon /> },
+    { id: "restaurants", label: t('restaurants'), icon: <RestaurantIcon /> },
+    { id: "orders", label: t('orders'), icon: <OrdersIcon /> },
   ];
 
   const drawer = (
@@ -55,7 +56,7 @@ const AdminDashboard = () => {
           component="div"
           sx={{ fontWeight: "bold" }}
         >
-          Admin Dashboard
+          {t("adminDashboard")}
         </Typography>
       </Toolbar>
         <Box sx={{ px: 2, mb: 1 }}>
@@ -68,7 +69,7 @@ const AdminDashboard = () => {
         fullWidth
         sx={{ mb: 2 }}
       >
-        Back to Home
+        {t("backHome")}
       </Button>
     </Box>
       <Divider />

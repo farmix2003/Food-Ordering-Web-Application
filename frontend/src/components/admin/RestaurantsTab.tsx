@@ -19,6 +19,7 @@ import { addImageToRestaurant, deleteImageFromRestaurant, deleteRestaurant, getA
 import { Edit, Eye } from "lucide-react";
 import RestaurantForm from "../restaurant/RestaurantForm";
 import { ArrowBack } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 interface Image {
   id: number;
@@ -53,8 +54,10 @@ const RestaurantsTab = () => {
   const [restaurant, setRestaurant] = useState<Restaurant & { newImages?: File[] } | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+  const {t} = useTranslation()
   const getRestaurants = async () => {
+
     try {
       const data = await getAllRestaurants();
       setRestaurants(data);
@@ -134,7 +137,7 @@ const handleDeleteRestaurant = async () => {
       !isEditModalOpen && (
         <>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
-        Restaurants Management
+        {t('restaurantManagement')}
       </Typography>
 
       <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
@@ -142,11 +145,11 @@ const handleDeleteRestaurant = async () => {
           <TableHead>
             <TableRow sx={{ backgroundColor: "primary.main" }}>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>ID</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Cuisine</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Owner</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Contact</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Actions</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>{t("name")}</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>{t('cuisine')}</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>{t('owner')}</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>{t('contact')}</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>{t('actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -192,7 +195,7 @@ const handleDeleteRestaurant = async () => {
  {
    isEditModalOpen && (
      <div>
-      <Button onClick={()=>setIsEditModalOpen(false)} ><ArrowBack /> Back</Button>
+      <Button onClick={()=>setIsEditModalOpen(false)} ><ArrowBack /> {t('back')}</Button>
         <RestaurantForm
             onSave={handleSaveRestaurant}
             onDelete={handleDeleteRestaurant}
@@ -206,7 +209,7 @@ const handleDeleteRestaurant = async () => {
       )
      }
       <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
-        Total restaurants: {restaurants.length}
+        {t('totalRestaurants',{length:restaurants.length})}
       </Typography>
 
       {/* Modal for Restaurant Details */}
@@ -216,14 +219,14 @@ const handleDeleteRestaurant = async () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Restaurant Details</DialogTitle>
+        <DialogTitle>{t('restaurantDetails')}</DialogTitle>
         <DialogContent dividers>
           {selectedRestaurant && (
             <>
               <Typography><strong>ID:</strong> {selectedRestaurant.id}</Typography>
-              <Typography><strong>Name:</strong> {selectedRestaurant.name}</Typography>
-              <Typography><strong>Cuisine:</strong> {selectedRestaurant.cuisineType}</Typography>
-              <Typography><strong>Owner:</strong> {selectedRestaurant.ownerUsername}</Typography>
+              <Typography><strong>{t('name')}:</strong> {selectedRestaurant.name}</Typography>
+              <Typography><strong>{t('cuisine')}:</strong> {selectedRestaurant.cuisineType}</Typography>
+              <Typography><strong>{t('owner')}:</strong> {selectedRestaurant.ownerUsername}</Typography>
               <Typography><strong>Email:</strong> {selectedRestaurant.contactInfo.email}</Typography>
               <Typography><strong>Phone:</strong> {selectedRestaurant.contactInfo.phone}</Typography>
               <Typography><strong>WhatsApp:</strong> {selectedRestaurant.contactInfo.whatsApp}</Typography>
@@ -237,7 +240,7 @@ const handleDeleteRestaurant = async () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSelectedRestaurant(null)} color="primary">
-            Close
+            {t('close')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { getUserByJwt } from "../server/server";
 import { ThemeProvider } from "@emotion/react";
 import { theme } from "../theme/theme";
 import { Box, Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 interface User {
   id: number;
@@ -17,7 +18,7 @@ export default function ChatWidget() {
   const [isSending, setIsSending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [user, setUser] = useState<User>();
-
+  const {t} = useTranslation()
   const getUser = async () => {
     const data = await getUserByJwt();
     setUser(data);
@@ -28,6 +29,8 @@ export default function ChatWidget() {
     getUser();
   }, []);
 
+  const SERVICE_ID = import.meta.env.VITE_SERVICE_ID
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_ID
   console.log(user);
   const handleSend = async () => {
     if (!message.trim() || !user) return;
@@ -43,22 +46,22 @@ export default function ChatWidget() {
 
     try {
       await emailjs.send(
-         "service_5te0f1w",
-        "template_w94unbm",
+         SERVICE_ID,
+        import.meta.env.VITE_TEMPLATE_ID,
         templateParams,
-        "ypHcmya_Z890b9Gva"     // replace with your real public key
+        PUBLIC_KEY
       );
 
-      setFeedback({ type: "success", message: "Thanks for your feedback!" });
+      setFeedback({ type: "success", message: t("feedbackSuccess")});
       setMessage("");
 
       setTimeout(() => {
         setIsOpen(false);
         setFeedback(null);
-      }, 2500); // auto-close after 2.5 seconds
+      }, 2500);
     } catch (err) {
       console.error(err);
-      setFeedback({ type: "error", message: "Failed to send. Please try again." });
+      setFeedback({ type: "error", message: t('feedbackFail') });
     } finally {
       setIsSending(false);
     }
@@ -72,7 +75,7 @@ export default function ChatWidget() {
       <Box
         onClick={() => setIsOpen(!isOpen)}
         sx={{bgcolor:"primary.main"}}
-        className="fixed bottom-5 right-5 bg-blue-600 hover:primary.main text-white p-4 rounded-full cursor-pointer shadow-lg"
+        className="fixed bottom-5 right-5 text-white p-4 rounded-full cursor-pointer shadow-lg"
       >
         💬
       </Box>
@@ -80,7 +83,7 @@ export default function ChatWidget() {
       {/* Modal */}
       {isOpen && (
           <div className="fixed bottom-20 right-5 w-80 bg-white p-4 shadow-xl rounded-lg z-50 border">
-          <h3 className="text-lg font-semibold mb-2">Send us your feedback</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('feedbackTitle')}</h3>
 
           <textarea
             rows={4}
@@ -96,7 +99,7 @@ export default function ChatWidget() {
             onClick={handleSend}
             disabled={isSending}
             >
-            {isSending ? "Sending..." : "Send"}
+            {isSending ? t('sendingFeedback') : t('send')}
           </Button>
 
           {/* Feedback message */}

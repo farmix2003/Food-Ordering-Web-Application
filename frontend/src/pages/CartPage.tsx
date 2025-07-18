@@ -21,7 +21,7 @@ import {
   updateCartItem,
 } from "../server/server";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { CurrencyLira } from "@mui/icons-material";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -72,6 +72,8 @@ const Cart = () => {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [address, setAddress] = useState<User>();
+  const [error, setError] = useState<string>("")
+  const [success, setSuccess] = useState<string>("")
   const { id } = useParams();
   const navigate = useNavigate();
  const {t} = useTranslation()
@@ -142,16 +144,22 @@ const Cart = () => {
     );
   
     if (!selectedAddress) {
-      toast.error("Please select a valid address");
+      setError("Please add address first");
+      setTimeout(()=>{
+        setError("")
+      },2500)
       return;
     }
   
     try {
       const data = await createOrder(selectedAddress.id);
-      toast.success("Order created successfully");
+      setSuccess("Order created successfully");
       console.log("Order response:", data);
+      setTimeout(()=>{
+        setSuccess("")
+        navigate(`/user/orders/${address.id}`)
+      },2500)
       handleClearCart()
-      navigate(`/user/orders/${address.id}`)
     } catch (error) {
       toast.error("Failed to create order");
       console.error(error);
@@ -190,7 +198,9 @@ const Cart = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('yourCart')}</h1>
-          <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
+          {
+            deliveryAddress ? (
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
             <div className="flex items-center text-gray-600">
               <MapPin className="w-5 h-5 mr-2" />
               <span className="text-sm">{deliveryAddress}</span>
@@ -205,8 +215,17 @@ const Cart = () => {
               {t('change')}
             </Button>
           </div>
+            ):(
+              <Button variant={"outline"} onClick={()=>setShowAddressModal(true)} className="text-gray-800 text-2xl">Add Address</Button>
+            )
+          }
         </div>
-
+{error && (
+  <Typography variant={"body1"} color="error">{error}</Typography>
+)}
+{success && (
+  <Typography variant={"body1"} color="success">{success}</Typography>
+)}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card>

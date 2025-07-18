@@ -19,6 +19,7 @@ import {
 import type { SelectChangeEvent } from "@mui/material";
 import { changeUserStatus, getAllUsers } from "../../server/server";
 import { BlockFlipped, Check } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 interface User {
   id: number;
   username: string;
@@ -30,7 +31,7 @@ interface User {
 const UsersTab = () => {
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [users, setUsers] = useState<User[]>([]);
-
+ const {t} = useTranslation()
   const getUsers = async () => {
     const data = await getAllUsers();
     setUsers(data);
@@ -70,7 +71,7 @@ getUsers()
   return (
     <Box>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
-        Users Management
+        {t('userManagement')}
       </Typography>
 
       <Box sx={{ mb: 3 }}>
@@ -81,9 +82,9 @@ getUsers()
             label="Filter by Role"
             onChange={handleRoleFilterChange}
           >
-            <MenuItem value="all">All Roles</MenuItem>
-            <MenuItem value="ROLE_CUSTOMER">User</MenuItem>
-            <MenuItem value="ROLE_RESTAURANT_OWNER">Restaurant Owner</MenuItem>
+            <MenuItem value="all">{t('allRoles')}</MenuItem>
+            <MenuItem value="ROLE_CUSTOMER">{t('user')}</MenuItem>
+            <MenuItem value="ROLE_RESTAURANT_OWNER">{t("restaurantOwner")}</MenuItem>
             <MenuItem value="ROLE_ADMIN">Admin</MenuItem>
           </Select>
         </FormControl>
@@ -97,19 +98,19 @@ getUsers()
                 ID
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Name
+                {t('name')}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Email
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Role
+                {t('role')}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Status
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Actions
+                {t('actions')}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -159,7 +160,7 @@ getUsers()
       </TableContainer>
 
       <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
-        Showing {filteredUsers.length} of {users.length} users
+       {t('filteredUsers',{filteredUsersLength:filteredUsers.length, usersLength:users.length})}
       </Typography>
     </Box>
   );

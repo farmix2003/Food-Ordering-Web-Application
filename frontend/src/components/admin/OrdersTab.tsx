@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { getAllOrders } from "../../server/server";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Order {
   id: number;
@@ -24,6 +25,7 @@ interface Order {
 
 const OrdersTab = () => {
   const [orders, setOrders] = useState<Order[]>([])
+  const {t} = useTranslation()
   const getStatusColor = (status: string) => {
     switch (status) {
       case "DELIVERED":
@@ -68,7 +70,7 @@ const OrdersTab = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", mb: 3 }}>
-        Orders Management
+        {t("ordersManagement")}
       </Typography>
 
       <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
@@ -76,22 +78,22 @@ const OrdersTab = () => {
           <TableHead>
             <TableRow sx={{ backgroundColor: "primary.main" }}>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Order ID
+                {t("id")}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Customer
+                {t('customer')}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Restaurant
+                {t('restaurant')}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Total
+                {'total'}
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 Status
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Order Date
+                {t('orderDate')}
               </TableCell>
             </TableRow>
           </TableHead>
@@ -144,13 +146,13 @@ const OrdersTab = () => {
         }}
       >
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Total orders: {orders.length}
+          {t("totalOrders",{orderLength:orders.length})}
         </Typography>
         <Typography
           variant="body2"
           sx={{ color: "text.secondary", fontWeight: "medium" }}
         >
-          Total revenue:{" "}
+          {t("totalRevenue")}
           {formatCurrency(
             orders.reduce((sum, order) => sum + order.totalPrice, 0)
           )}

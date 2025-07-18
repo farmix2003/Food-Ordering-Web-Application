@@ -122,20 +122,6 @@ const Orders = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">{t("yourOrders")}</h1>
-
-      {orders[0].user.addressList.length === 0 && (
-        <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-6">
-          {t("noAddress")}{" "}
-          <Button
-            variant="outline"
-            className="ml-2 border border-yellow-600 text-yellow-700"
-            onClick={() => navigate("/add-address")}
-          >
-            {t('addAddress')}
-          </Button>
-        </div>
-      )}
-
       {orders.map((order) => (
         <Card key={order.id} className="mb-6 shadow-sm">
           <CardHeader>
@@ -157,7 +143,7 @@ const Orders = () => {
           </CardHeader>
 
           <CardContent>
-            {order.user && order.user.addressList.length > 0 && (
+            {order.user && order.user.addressList.length > 0 ? (
               <div className="mb-2 text-sm text-gray-700">
                 {order.user.addressList.map((item, idx) => (
                   <div key={idx}>
@@ -166,7 +152,19 @@ const Orders = () => {
                   </div>
                 ))}
               </div>
-            )}
+            ): (
+        <div className="bg-yellow-100 text-yellow-800 p-4 rounded mb-6">
+          {t("noAddress")}{" "}
+          <Button
+            variant="outline"
+            className="ml-2 border border-yellow-600 text-yellow-700"
+            onClick={() => navigate("/add-address")}
+          >
+            {t('addAddress')}
+          </Button>
+        </div>
+      )
+            }
 
             <Separator className="my-3" />
 

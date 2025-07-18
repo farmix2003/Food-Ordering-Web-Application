@@ -77,7 +77,7 @@ const HomePage = ({t}:I18n) => {
             {t("topRestaurants")}
           </h2>
           <TopRestaurantsGrid restaurants={restaurants} t={t} />
-          <Button variant={"link"}onClick={() => navigate("/restaurants")} className="mt-4 font-bold text-amber-700 text-2xl hover:text-amber-800" >Explore All</Button>
+          <Button variant={"link"}onClick={() => navigate("/restaurants")} className="mt-4 font-bold text-amber-700 text-2xl hover:text-amber-800" >{t("exploreAll")}</Button>
         </div>
 
         {/* Order Again Section */}

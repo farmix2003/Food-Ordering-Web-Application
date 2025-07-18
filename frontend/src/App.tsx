@@ -22,6 +22,7 @@ import { checkTokenExpiry } from "./server/server";
 import RestaurantSidebar from "./components/restaurant/RestaurantSidebar";
 import Orders from "./components/user/Orders";
 import { useTranslation } from "react-i18next";
+import ChatWidget from "./components/ChatModal";
 
 const queryClient = new QueryClient();
 
@@ -94,7 +95,9 @@ const App = () => {
             <Route path="/restaurant/dashboard" element={<PrivateRoute element={<RestaurantSidebar />} />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ChatWidget />
           {/* <Footer /> */}
+
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

@@ -416,7 +416,7 @@ const UserOverview = () => {
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-white hover:bg-white">
             <AlertDialogHeader>
               <AlertDialogTitle>{t('confirmAddressDeletion')}</AlertDialogTitle>
               <AlertDialogDescription>
@@ -427,7 +427,7 @@ const UserOverview = () => {
               <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDeleteAddress}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700"
               >
                 {t("deleteAddress")}
               </AlertDialogAction>

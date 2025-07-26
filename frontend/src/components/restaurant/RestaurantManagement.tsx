@@ -417,18 +417,14 @@ const RestaurantManagement = () => {
   const handleImageDelete = async (menuId: number, imgId: number) => {
     try {
       await deleteImagefromMenu(menuId, imgId);
-      setMenuItems((prev) =>
-        prev.map((item) =>
-          item.id === menuId
-            ? { ...item, images: item.images.filter((img) => img.id !== imgId) }
-            : item
-        )
-      );
       toast({
         title: "Image Deleted",
-        description: "The image has been removed successfully.",
+        description: "The image has been deleted successfully.",
       });
-      await getAllMenuItems(); // Refresh menu items
+  setEditingItem((prev) =>
+    prev ? { ...prev, images: prev.images.filter((img) => img.id !== imgId) } : prev
+  );
+      await getAllMenuItems();
     } catch (error) {
       console.error("Failed to delete image:", error);
       toast({
@@ -590,13 +586,15 @@ const RestaurantManagement = () => {
                   id: editingItem.id,
                   name: editingItem.foodName,
                   price: editingItem.price,
+                  categoryId: editingItem.categoryName ? categories.find(cat => cat.categoryName === editingItem.categoryName)?.id || null : null,
                   image: null,
                   description: editingItem.description,
                   extras: editingItem.extrasList,
+                  categoryName: editingItem.categoryName,
                 }
               : null
           }
-          existingImages={editingItem?.images || []}
+          existingImages={menuItems.length >0 ? editingItem?.images ||[] : []}
           extras={extras}
           categories={categories}
           onAddExtra={handleAddExtrasToMenuItem}

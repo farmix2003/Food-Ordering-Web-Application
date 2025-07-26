@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -20,7 +20,9 @@ interface MenuItem {
   name: string;
   price: number;
   image: File | null;
+  categoryId: number | null;
   description: string;
+  categoryName?: string;
   extras: { id: number; name: string; price: number }[];
 }
 
@@ -35,8 +37,8 @@ interface MenuItemModalProps {
   onAddCategory: (name: string) => Promise<number>;
   existingImages: Image[];
   onDeleteExtra: (id: number) => void;
-  onDeleteImage: (menuId: number, imageId: number, existingImages: Image[]) => void;
-  onRefreshMenuItems: () => Promise<void>; // Added as per previous suggestion
+  onDeleteImage: (menuId: number, imageId: number) => void;
+  onRefreshMenuItems: () => Promise<void>;
 }
 
 const MenuItemModal = ({
@@ -54,7 +56,6 @@ const MenuItemModal = ({
 }: MenuItemModalProps) => {
   const isEditMode = !!editingItem;
 
-  // Define the Extra type explicitly to include optional id
   interface Extra {
     id?: number;
     name: string;
@@ -66,18 +67,27 @@ const MenuItemModal = ({
     price: number;
     image: File | null;
     description: string;
+    categoryId?: number | null;
     extras: Extra[];
   }>({
     name: "",
     price: 0,
     image: null,
     description: "",
+    categoryId:editingItem?.categoryId,
     extras: [{ name: "", price: 0 }],
   });
 
   const [selectedExtrasIds, setSelectedExtrasIds] = useState<number[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
+const [localImages, setLocalImages] = useState<Image[]>([]);
+
+  useEffect(() => {
+    if (editingItem ) {
+      setLocalImages(existingImages || []);
+    }
+  }, [editingItem, existingImages, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -86,6 +96,7 @@ const MenuItemModal = ({
           name: editingItem.name,
           price: editingItem.price,
           image: null,
+          categoryId: editingItem.categoryId || null,
           description: editingItem.description,
           extras: editingItem.extras.length > 0
             ? editingItem.extras.map((extra) => ({ id: extra.id, name: extra.name, price: extra.price }))
@@ -140,7 +151,7 @@ const MenuItemModal = ({
           formData.name,
           formData.description,
           formData.price,
-          categoryIdToUse || 0,
+          (categoryIdToUse ?? editingItem.categoryId ?? 0),
           extrasIds
         );
 
@@ -149,8 +160,6 @@ const MenuItemModal = ({
           title: "Menu Item Updated",
           description: "The menu item has been updated successfully.",
         });
-
-        // Refresh menu items
         await onRefreshMenuItems();
       } catch (error) {
         console.error("Failed to update menu item:", error);
@@ -161,7 +170,6 @@ const MenuItemModal = ({
         });
       }
     } else {
-      // Add new menu item
       onSave({
         name: formData.name,
         price: formData.price,
@@ -179,6 +187,8 @@ const MenuItemModal = ({
     setNewCategoryName("");
     onClose();
   };
+
+
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -215,17 +225,17 @@ const MenuItemModal = ({
               onChange={(e) => setFormData((p) => ({ ...p, image: e.target.files?.[0] || null }))}
             />
             {formData.image && <p className="text-sm mt-1">{formData.image.name}</p>}
-            {isEditMode &&
-              existingImages.map((img) => (
+            {isEditMode && localImages && localImages.length > 0 && 
+              localImages.map((img) => (
                 <div key={img.id} className="relative group mt-2">
                   <img src={img.url} alt={img.fileName} className="w-full h-32 object-cover rounded-lg border" />
                   <p className="text-sm text-gray-600 mt-1">{img.fileName}</p>
                   <button
                     type="button"
-                    onClick={() => onDeleteImage(editingItem!.id, img.id, existingImages)}
+                    onClick={() => onDeleteImage(editingItem.id, img.id)}
                     className="absolute top-2 right-2 bg-red-600 text-white p-1 cursor-pointer rounded-full opacity-0 group-hover:opacity-100"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4"/>
                   </button>
                 </div>
               ))}
@@ -271,7 +281,6 @@ const MenuItemModal = ({
                       type="button"
                       variant="ghost"
                       onClick={async () => {
-                        // Only attempt to delete from backend if extra has an id
                         if (extra.id !== undefined) {
                           try {
                             await onDeleteExtra(extra.id);
@@ -290,8 +299,6 @@ const MenuItemModal = ({
                             return;
                           }
                         }
-
-                        // Remove the extra from formData.extras
                         const updatedExtras = [...formData.extras];
                         updatedExtras.splice(index, 1);
                         setFormData((prev) => ({ ...prev, extras: updatedExtras }));
@@ -317,6 +324,7 @@ const MenuItemModal = ({
           {/* Category */}
           <div>
             <Label>Category</Label>
+            <Typography variant="body2" className="text-gray-600">Current Category: {editingItem?.categoryName}</Typography>
             <select
               className="w-full mt-1 border rounded px-3 py-2"
               value={selectedCategoryId ?? ""}

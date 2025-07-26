@@ -153,13 +153,15 @@ public class MenuServiceImpl implements MenuService {
         }
 
         if (req.getExtrasIds() != null) {
-            List<Extras> extras = extrasRepository.findAllById(req.getExtrasIds());
-            menu.setExtrasList(extras);
+            List<Extras> newExtras = extrasRepository.findAllById(req.getExtrasIds());
+
+            menu.getExtrasList().clear();
+            
+            menu.getExtrasList().addAll(newExtras);
         }
 
         return menuRepository.save(menu);
     }
-
 
     public MenuDto toDto(Menu menu) {
         List<ImageResponse> imageUrls = menu.getImagesList().stream()

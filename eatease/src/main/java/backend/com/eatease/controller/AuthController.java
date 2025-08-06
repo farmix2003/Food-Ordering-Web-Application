@@ -94,8 +94,10 @@ public class AuthController {
         String email = user.getEmail();
         String password = user.getPassword();
 
+
+
         User user1 = userRepository.findByEmail(email);
-        if (Objects.equals(user1.getStatus(), "blocked")){
+        if (Objects.equals(user1.getStatus(), "block")){
             AuthResponse response = new AuthResponse();
             response.setMessage("User is blocked by admin");
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);

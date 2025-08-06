@@ -17,7 +17,7 @@ import {
 import { Search } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { searchMenu, searchRestaurants } from "../../server/server";
+import { getAllRestaurants, searchMenu, searchRestaurants } from "../../server/server";
 import type { I18n } from "../../pages/Index";
 
 interface ImageResponse {
@@ -42,6 +42,7 @@ interface MenuDto {
   images: ImageResponse[];
   extras: ExtrasDto[];
   restaurantId: number;
+  restaurantOpen?: boolean;
 }
 
 interface Restaurant {
@@ -52,19 +53,26 @@ interface Restaurant {
   images: ImageResponse[];
 }
 
-const SearchSection = ({t}:I18n) => {
+const SearchSection = ({ t }: I18n) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [menus, setMenus] = useState<MenuDto[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [showResults, setShowResults] = useState(false);
-
+  const [restaurantsData, setRestaurantsData] = useState<Restaurant[]>([]);
   const navigate = useNavigate();
 
-
-  const isRestaurantOpen = (restaurantId: number): boolean => {
-    const restaurant = restaurants.find((r) => r.id === restaurantId);
-    return restaurant?.open ?? false;
-  };
+  useEffect(() => {
+    const getRestaurants = async () => {
+      try {
+        const data = await getAllRestaurants();
+        console.log("All Restaurants:", data);
+        setRestaurantsData(data);
+      } catch (error) {
+        console.error("Failed to fetch all restaurants:", error);
+      }
+    };
+    getRestaurants();
+  }, []);
 
   const searchMenusAndRestaurants = async () => {
     if (searchTerm.trim() === "") {
@@ -79,7 +87,30 @@ const SearchSection = ({t}:I18n) => {
         searchMenu(searchTerm),
         searchRestaurants(searchTerm),
       ]);
-      setMenus(menuData);
+
+      console.log("Menus:", menuData);
+      console.log("Search Restaurants:", restaurantData);
+
+      const allRestaurants = [
+        ...restaurantData,
+        ...restaurantsData.filter(
+          (r) => !restaurantData.some((rd:Restaurant) => rd.id === r.id)
+        ),
+      ];
+
+      console.log("Combined Restaurants:", allRestaurants);
+
+      const updatedMenus = menuData.map((menu: MenuDto) => {
+        const matchedRestaurant = allRestaurants.find(
+          (r: Restaurant) => r.id === menu.restaurantId
+        );
+        return {
+          ...menu,
+          restaurantOpen: matchedRestaurant ? matchedRestaurant.open : undefined,
+        };
+      });
+
+      setMenus(updatedMenus);
       setRestaurants(restaurantData);
       setShowResults(true);
     } catch (error) {
@@ -150,70 +181,77 @@ const SearchSection = ({t}:I18n) => {
                     {t("dishes")}
                   </Typography>
                   <List>
-                    {menus.map((menu) => {
-                      const open = isRestaurantOpen(menu.restaurantId);
-                      return (
-                        <ListItem
-                          key={menu.id}
-                          alignItems="flex-start"
-                          sx={{
-                            mb: 2,
-                            bgcolor: open ? "grey.100" : "grey.200",
-                            borderRadius: 2,
-                            opacity: open ? 1 : 0.5,
-                          }}
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              variant="rounded"
-                              src={menu.images[0]?.url || ""}
-                              alt={menu.foodName}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={
-                              <Typography variant="subtitle1">
-                                {menu.foodName}
-                              </Typography>
-                            }
-                            secondary={
-                              <Box>
-                                <Typography variant="body2" color="text.secondary">
-                                  {menu.description}
-                                </Typography>
-                                <Typography variant="body2" color="text.primary">
-                                  ${menu.price.toFixed(2)} —{" "}
-                                  {menu.available ? "Available" : "Unavailable"}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color={open ? "green" : "error"}
-                                >
-                                  {open ? "Restaurant Open" : "Restaurant Closed"}
-                                </Typography>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  sx={{ mt: 1 }}
-                                  disabled={!open}
-                                  onClick={() =>
-                                    navigate(`/restaurants/${menu.restaurantId}`, {
-                                      state: {
-                                        restaurant: restaurants.find(
-                                          (r) => r.id === menu.restaurantId
-                                        ),
-                                      },
-                                    })
-                                  }
-                                >
-                                  {t("goToRestaurant")}
-                                </Button>
-                              </Box>
-                            }
+                    {menus.map((menu) => (
+                      <ListItem
+                        key={menu.id}
+                        alignItems="flex-start"
+                        sx={{
+                          mb: 2,
+                          bgcolor: menu.restaurantOpen === true ? "grey.100" : "grey.200",
+                          borderRadius: 2,
+                          opacity: menu.restaurantOpen === true ? 1 : 0.5,
+                        }}
+                      >
+                        <ListItemAvatar>
+                          <Avatar
+                            variant="rounded"
+                            src={menu.images[0]?.url || ""}
+                            alt={menu.foodName}
                           />
-                        </ListItem>
-                      );
-                    })}
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Typography variant="subtitle1">
+                              {menu.foodName}
+                            </Typography>
+                          }
+                          secondary={
+                            <Box>
+                              <Typography variant="body2" color="text.secondary">
+                                {menu.description}
+                              </Typography>
+                              <Typography variant="body2" color="text.primary">
+                                ${menu.price.toFixed(2)} —{" "}
+                                {menu.available ? "Available" : "Unavailable"}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color={
+                                  menu.restaurantOpen === true
+                                    ? "green"
+                                    : menu.restaurantOpen === false
+                                    ? "error"
+                                    : "text.secondary"
+                                }
+                              >
+                                {menu.restaurantOpen === true
+                                  ? "Restaurant Open"
+                                  : menu.restaurantOpen === false
+                                  ? "Restaurant Closed"
+                                  : "Restaurant Status Unknown"}
+                              </Typography>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                sx={{ mt: 1 }}
+                                disabled={menu.restaurantOpen !== true}
+                                onClick={() =>
+                                  navigate(`/restaurants/${menu.restaurantId}`, {
+                                    state: {
+                                      restaurant: restaurantsData.find(
+                                        (r) => r.id === menu.restaurantId
+                                      ),
+                                    },
+                                  })
+                                }
+                              >
+                                {t("goToRestaurant")}
+                              </Button>
+                            </Box>
+                          }
+                        />
+                      </ListItem>
+                    ))}
                   </List>
                 </>
               )}
@@ -257,28 +295,28 @@ const SearchSection = ({t}:I18n) => {
                               <Typography variant="body2" color="text.secondary">
                                 {restaurant.cuisineType}
                               </Typography>
-                              <Box sx={{display: 'flex', alignItems: 'center'}}>
-                              <Typography
-                                variant="caption"
-                                sx={{fontSize: 14}}
-                                color={restaurant.open ? "green" : "error"}
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Typography
+                                  variant="caption"
+                                  sx={{ fontSize: 14 }}
+                                  color={restaurant.open ? "green" : "error"}
                                 >
-                                {restaurant.open ? "Open" : "Closed"}
-                              </Typography>
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                sx={{ mt: 1, ml:1}}
-                                disabled={!restaurant.open}
-                                onClick={() =>
-                                  navigate(`/restaurants/${restaurant.id}`, {
-                                    state: { restaurant },
-                                  })
-                                }
+                                  {restaurant.open ? "Open" : "Closed"}
+                                </Typography>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ mt: 1, ml: 1 }}
+                                  disabled={!restaurant.open}
+                                  onClick={() =>
+                                    navigate(`/restaurants/${restaurant.id}`, {
+                                      state: { restaurant },
+                                    })
+                                  }
                                 >
-                                {t("goToRestaurant")}
-                              </Button>
-                                </Box>
+                                  {t("goToRestaurant")}
+                                </Button>
+                              </Box>
                             </Box>
                           }
                         />
@@ -290,7 +328,7 @@ const SearchSection = ({t}:I18n) => {
 
               {menus.length === 0 && restaurants.length === 0 && (
                 <Typography variant="body1" color="text.secondary">
-                 {t("noResultFound")}
+                  {t("noResultFound")}
                 </Typography>
               )}
             </Paper>

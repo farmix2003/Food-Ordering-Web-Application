@@ -340,7 +340,7 @@ className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:te
                 onClick={onDelete}
                 className="w-full border-2 border-red-500 hover:bg-red-600 text-red-500 hover:text-white hover:border-red-600"
               >
-                {"deleteRes"}
+                {t("confirmation")}
               </Button>
             </DialogFooter>
           </DialogContent>

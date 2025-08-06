@@ -104,13 +104,14 @@ public class OrderServiceImpl implements OrderService {
 
         orderedFoodRepository.saveAll(orderedFoods);
 
-        savedOrder.setOrderedFoodList(orderedFoods); // optional, if you want to attach them
+        savedOrder.setOrderedFoodList(orderedFoods);
         cartService.clearCart(user.getId());
 
         return savedOrder;
     }
 
     @Override
+    @Transactional
     public Order updateOrderStatus(Long orderId, String status) throws Exception {
         Order order = getOrderById(orderId);
         if (status.equals("PENDING") || status.equals("PREPARING") || status.equals("COMPLETED") || status.equals("DELIVERED") || status.equals("ON_WAY")) {

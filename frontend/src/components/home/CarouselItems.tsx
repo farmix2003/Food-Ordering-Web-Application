@@ -1,4 +1,4 @@
-import { ShoppingCart } from "@mui/icons-material";
+import { CurrencyLira, ShoppingCart } from "@mui/icons-material";
 import { Button, Card } from "@mui/material";
 import { addItemToCart, getRestaurantById, getUserByJwt } from "../../server/server";
 import { useEffect, useState } from "react";
@@ -32,9 +32,13 @@ const CarouselItems = ({
 
   const [restaurant, setRestaurant] = useState<string>()
   const [user, setUser] = useState<User>()
+  const [isRestaurantOpen, setIsRestaurantOpen] = useState<boolean>(false)
   const navigate = useNavigate()
   const getRestaurant = async() =>{
     const response = await getRestaurantById(restaurantId)
+    console.log(response);
+    setIsRestaurantOpen(response.open)
+    
     setRestaurant(response.name)
   }
 
@@ -52,7 +56,7 @@ const CarouselItems = ({
   return (
     <Card
       component={"div"}
-      className="flex flex-col gap-1 m-2 items-start justify-center shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300"
+      className={`flex flex-col gap-1 m-2 items-start justify-center shadow-lg rounded-lg ${isRestaurantOpen ? "hover:shadow-xl transition-shadow duration-300" : "opacity-50 pointer-events-none"}`}
     >
       <img
         src={image}
@@ -66,7 +70,7 @@ const CarouselItems = ({
       <span className="text-gray-700 p-1 font-bold">{restaurant}</span>
       {/* <Card className="flex items-center justify-between w-full px-2 py-1 bg-gray-100 rounded-md"> */}
       <div className="w-full p-1 flex items-center justify-between">
-        <span className="text-xl font-bold text-orange-600">{price}</span>
+        <span className="text-xl font-bold text-orange-600"><CurrencyLira /> {price}</span>
         <Button
           onClick={async() => {
             try {
@@ -93,7 +97,7 @@ const CarouselItems = ({
           className="bg-orange-500 hover:bg-orange-600"
           startIcon={<ShoppingCart className="w-4 h-4" />}
         >
-          {t("addToCart")}
+          {isRestaurantOpen ? t("addToCart") : t("close") }
         </Button>
       </div>
       {/* </Card> */}

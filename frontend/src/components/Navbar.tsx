@@ -161,7 +161,7 @@ const Navbar:React.FC<I18n> = ({i18n, languages}) => {
     { text: "Restaurants", icon: <Restaurant /> },
 
   ];
-
+  const jwt = window.localStorage.getItem("token");
   return (
     <>
       <AppBar position="sticky" sx={{ bgcolor: "background.paper", color: "text.primary" }}>
@@ -169,7 +169,7 @@ const Navbar:React.FC<I18n> = ({i18n, languages}) => {
           <Typography
             variant="h5"
             sx={{ fontWeight: "bold", color: "#FF6B35", cursor: "pointer" }}
-            onClick={() => navigate("/home")}
+            onClick={() => navigate(`${jwt ? "/home" : "/"}`)}
           >
             Eat Ease
           </Typography>

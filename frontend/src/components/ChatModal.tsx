@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { getUserByJwt } from "../server/server";
 import { ThemeProvider } from "@emotion/react";
@@ -25,7 +25,7 @@ export default function ChatWidget() {
   };
 
 
-  useEffect(() => {
+  useMemo(() => {
     getUser();
   }, []);
 

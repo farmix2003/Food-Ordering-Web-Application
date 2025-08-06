@@ -324,7 +324,10 @@ const [localImages, setLocalImages] = useState<Image[]>([]);
           {/* Category */}
           <div>
             <Label>Category</Label>
-            <Typography variant="body2" className="text-gray-600">Current Category: {editingItem?.categoryName}</Typography>
+            {editingItem && editingItem.categoryName && (
+              <Typography variant="body2" className="text-gray-600">Current Category: {editingItem?.categoryName}</Typography>
+            )
+            }
             <select
               className="w-full mt-1 border rounded px-3 py-2"
               value={selectedCategoryId ?? ""}

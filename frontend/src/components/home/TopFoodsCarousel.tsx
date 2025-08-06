@@ -91,6 +91,8 @@ const Carousel = ({t}:I18n) => {
        setMenuItems(data.data)
     }
   
+  
+
     useEffect(()=>{
       getPopularMenuItems()
     },[])

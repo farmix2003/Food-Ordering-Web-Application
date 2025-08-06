@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "../../hooks/use-toast";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -335,6 +335,7 @@ const RestaurantManagement = () => {
         title: "Restaurant Status Updated",
         description: "The restaurant status has been updated successfully.",
       });
+      await getRestaurantByUserId()
     } catch (error) {
       toast({
         title: "Error",
@@ -343,7 +344,9 @@ const RestaurantManagement = () => {
       });
     }
   };
-
+useMemo( async()=>{
+  await getRestaurantByUserId()
+},[])
   const getExtras = async () => {
     try {
       const data = await getExtrasByRestaurantId(restaurant?.id || 0);

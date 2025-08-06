@@ -111,9 +111,9 @@ const Orders = () => {
         <p className="text-gray-600 mt-2">{t("placeOrder")}</p>
         <Button
           className="mt-4"
-          onClick={() => navigate(`/profile`)}
+          onClick={() => navigate(`/restaurants`)}
         >
-          {t("addAddress")}
+          {t("browseMenu")}
         </Button>
       </div>
     );

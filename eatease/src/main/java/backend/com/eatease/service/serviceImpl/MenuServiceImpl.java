@@ -37,6 +37,9 @@ public class MenuServiceImpl implements MenuService {
     @Autowired
     private OrderedFoodRepository orderedFoodRepository;
 
+    @Autowired
+    private CartItemRepository cartItem;
+
     @Override
     @Transactional
     public Menu addFood(FoodRequest req, Restaurant restaurant) {
@@ -100,6 +103,7 @@ public class MenuServiceImpl implements MenuService {
        imageRepository.deleteByMenuId(id);
        menu.setCategory(null);
        orderedFoodRepository.deleteByFoodId(id);
+       cartItem.deleteByFoodId(id);
        menuRepository.deleteById(menu.getId());
     }
 
@@ -156,7 +160,7 @@ public class MenuServiceImpl implements MenuService {
             List<Extras> newExtras = extrasRepository.findAllById(req.getExtrasIds());
 
             menu.getExtrasList().clear();
-            
+
             menu.getExtrasList().addAll(newExtras);
         }
 
